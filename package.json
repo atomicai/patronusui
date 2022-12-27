@@ -1,0 +1,67 @@
+{
+  "name": "final",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@heroicons/react": "^2.0.13",
+    "@mui/material": "^5.10.16",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.2.0",
+    "date-fns": "^2.29.3",
+    "jotai": "^1.11.2",
+    "plotly.js": "^2.16.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-drag-drop-files": "^2.3.8",
+    "react-hot-toast": "^2.4.0",
+    "react-plotly.js": "^2.6.0",
+    "react-query": "^3.39.2",
+    "react-router-dom": "^6.4.3",
+    "react-scripts": "5.0.1",
+    "rsuite": "^5.23.3",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/plotly.js": "^2.12.9",
+    "@types/react-plotly.js": "^2.5.2",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "autoprefixer": "^10.4.13",
+    "eslint": "^8.28.0",
+    "postcss": "^8.4.19",
+    "prettier": "^2.7.1",
+    "tailwind-scrollbar": "^2.0.1",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.9.3"
+  }
+}
