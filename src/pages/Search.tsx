@@ -258,7 +258,7 @@ export const Search: React.FC = () => {
               value={inputValue}
               placeholder={''}
               autoComplete="false"
-              className="outline-none border-none text-center w-full h-full bg-[#12071f] text-white text-3xl "
+              className="outline-none border-none text-center w-full h-full bg-[#12071f] text-white text-3xl"
             />
           ) : (
             <div className="text-gray-200 opacity-80 ">
