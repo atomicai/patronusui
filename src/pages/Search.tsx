@@ -68,10 +68,6 @@ export const Search: React.FC = () => {
     }, 6000)
   }, [])
 
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
   const handleUnknown = (index: number, text: string) => {
     isUnknown === index ? setIsUnknown(-1) : setIsUnknown(index)
 
@@ -125,7 +121,7 @@ export const Search: React.FC = () => {
 
   const handleDownloadFavs = async () => {
     const response: string = await axios
-      .post('https://my-json-server.typicode.com/alexsheks/data/glossary', {
+      .post('/snapshotting', {
         docs: favorite
       })
       .then((res) => res.data)
@@ -253,7 +249,7 @@ export const Search: React.FC = () => {
               type="search"
               // onBlur={() => setSearchMode(false)}
               autoFocus={true}
-              onKeyDown={(event) => event.key === 'Enter' && handleSearchTest()}
+              onKeyDown={(event) => event.key === 'Enter' && handleSearch()}
               onChange={(event) => setInputValue(event.target.value)}
               value={inputValue}
               placeholder={''}
