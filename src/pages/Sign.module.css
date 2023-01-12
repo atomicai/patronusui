@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .section {
+    @apply pt-10 flex flex-col justify-center items-center gap-10;
+  }
+  .header {
+    @apply text-white text-2xl;
+  }
+  .message {
+    @apply w-96 p-5 text-center text-xl text-white shadow-sm shadow-primary rounded-xl;
+  }
+  .form {
+    @apply w-96 p-10 flex flex-col justify-center items-center gap-10 shadow-xl shadow-primary rounded-xl;
+  }
+  .label {
+    @apply w-full flex flex-col justify-center items-center;
+  }
+  .labelContent {
+    @apply w-full pb-3 text-xl text-white;
+  }
+  .input {
+    @apply h-9 w-80 pl-2 bg-secondary text-xl text-white border-b border-primary outline-none;
+  }
+  .enabledButton {
+    @apply w-full py-3 bg-primary text-xl text-white rounded-lg hover:shadow-inner hover:shadow-secondary;
+  }
+  .disabledButton {
+    @apply w-full py-3 bg-primary text-xl text-white rounded-lg cursor-not-allowed;
+  }
+  .p {
+    @apply text-xl text-white;
+  }
+  .link {
+    @apply underline;
+  }
+}

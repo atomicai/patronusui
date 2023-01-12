@@ -5,6 +5,8 @@ import { Search } from '../pages/Search'
 import { Error } from '../pages/util/Error'
 import { View } from '../pages/View'
 import Profile from '../pages/Profile'
+import SignIn from '../pages/SignIn'
+import SignUp from '../pages/SignUp'
 
 const router = createBrowserRouter([
   {
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
       {
         path: 'iprofile',
         element: <Profile />
+      },
+      {
+        path: 'isignin',
+        element: <SignIn />
+      },
+      {
+        path: 'isignup',
+        element: <SignUp />
       }
     ]
   }
