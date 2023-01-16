@@ -1,3 +1,5 @@
+import { PlotParams } from 'react-plotly.js';
+
 export interface Figure {
   data: Plotly.Data[]
   layout: Partial<Plotly.Layout>
@@ -24,4 +26,14 @@ export interface ViewPayload {
   figure: string
   title: string
   premium: boolean
+}
+
+export interface KeywordsData {
+  data: string[];
+  title: string;
+}
+
+export interface PlotPayload {
+  figure: PlotParams;
+  keywords?: KeywordsData[];
 }

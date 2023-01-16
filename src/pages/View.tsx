@@ -16,6 +16,8 @@ import axios from 'axios'
 import Plot, { PlotParams } from 'react-plotly.js'
 import { file, plots, viewPayload } from '../contexts/UploadContext'
 import { NavLink } from 'react-router-dom'
+import { PlotPayload } from '../@types/view';
+import { Keywords } from '../components/Keywords';
 
 export const View = () => {
   const setPlots = useSetAtom(plots)
@@ -51,7 +53,7 @@ export const View = () => {
   }
 
   return (
-    <div className="w-full h-full flex justify-end items-center">
+    <div className="w-full h-full flex justify-end items-center py-4">
       <nav className="h-1/3 w-[4%]  border-[#A456F0] border-r flex flex-col items-center justify-evenly">
         <NavLink
           to={'/'}
@@ -69,22 +71,35 @@ export const View = () => {
       </nav>
       <section className="h-full w-[92%]">
         <>
-          <div className="w-full h-[95%] flex justify-center items-center">
-            {plotsAtom.map((figure: PlotParams, index: number) => {
-              if (index === sliderIndex) {
-                return (
-                  <div className="px-4 py-2 w-full h-full flex flex-col justify-center items-center">
-                    <Plot
-                      key={index}
-                      data={figure.data}
-                      layout={figure.layout}
-                    />
+          <div className="w-full h-[95%] overflow-auto">
+            {plotsAtom.map((figures: PlotParams | (PlotPayload | PlotParams)[], index: number) =>
+              (index === sliderIndex)
+                ? (
+                  <div key={index} className="w-full flex flex-col justify-center items-center">
+                    {
+                      (Array.isArray(figures) ? figures : [{ figure: figures }]).map((item, itemIdx) => {
+                        const figure = ('figure' in item) ? item.figure : item;
+                        return (
+                          <div key={itemIdx} className="py-4 w-full flex flex-col justify-center items-center">
+                            <Plot
+                              data={figure.data}
+                              layout={figure.layout}
+                            />
+                            {('keywords' in item) && item.keywords?.length && (
+                              <div className="pt-2 pb-4 w-full flex justify-center items-center gap-4">
+                                <Keywords keywords={item.keywords} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    }
                   </div>
                 )
-              }
-            })}
+                : null
+            )}
           </div>
-          <div className="w-full h-[5%] inline-flex justify-center">
+          <div className="w-full h-[5%] pt-2 inline-flex justify-center">
             <ChevronDoubleLeftIcon
               color={sliderIndex !== 0 ? 'white' : 'gray'}
               height={20}
