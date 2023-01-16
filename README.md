@@ -1,6 +1,11 @@
-> This project is a UI source code for the <a href="https://pypi.org/project/patronus/">patronus</a> project. 
+> This project is a UI source code for the <a href="https://github.com/atomicai/patronus/">patronus</a> project. 
 
 ---
+
+### Workflow
+> This is simple. Once you submit the file, fill in the "text" and "date" column names, if necessary, and wait a bit for magic to happen 🪄.
+
+![flowui](./docs/patronus_doc.png)
 
 ### Installation
 
