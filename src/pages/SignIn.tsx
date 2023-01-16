@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import styles from './Sign.module.css'
+import { useAtom, useSetAtom } from 'jotai'
+import { usernameAtom, isSignedInAtom } from '../contexts/User'
 
 function SignIn() {
-  const [username, setUsername] = useState<string>('')
+  const setIsSignedIn = useSetAtom(isSignedInAtom)
+  const [username, setUsername] = useAtom(usernameAtom)
   const [password, setPassword] = useState<string>('')
   const [message, setMessage] = useState<string>('')
 
@@ -14,7 +17,7 @@ function SignIn() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage('Incorrect username or password.')
+    setIsSignedIn(true)
     /* Put auth job*/
   }
 
