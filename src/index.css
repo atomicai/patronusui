@@ -312,3 +312,7 @@ li + li {
     border-right-color: transparent;
   }
 }
+
+.text-cyan {
+  color: cyan;
+}

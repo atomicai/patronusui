@@ -31,11 +31,11 @@ export const Keywords: FC<KeywordsProps> = ({ keywords}) => {
         <div key={idx} className="px-4 py-2 flex flex-col justify-center items-center border-2 border-dotted border-current rounded-md">
           <div>
             {item.data.map((word, wordIdx) => (
-              <button className="m-1 text-teal-500 italic hover:underline" key={wordIdx} onClick={handleWordClick}>{word}</button>
+              <button className="m-1 text-cyan italic hover:underline" key={wordIdx} onClick={handleWordClick}>{word}</button>
             ))}
           </div>
           <div>
-            <button className="font-bold text-teal-500 hover:underline" onClick={handleTitleClick}>{item.title}</button>
+            <button className="font-bold text-cyan hover:underline" onClick={handleTitleClick}>{item.title}</button>
           </div>
         </div>
       ))}
