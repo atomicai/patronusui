@@ -120,15 +120,12 @@ export const Search: React.FC = () => {
   }
 
   const handleDownloadFavs = async () => {
-    const response: string = await axios
-      .post('/snapshotting', {
+    const filename = await axios
+      .post<{ filename: string }>('/snapshotting', {
         docs: favorite
       })
-      .then((res) => res.data)
-
-    console.log(response)
-
-    navigate(`/downloading/${response}`)
+      .then((res) => res.data.filename)
+    window.open(`/downloading/${filename}`)
   }
 
   const handleRemove = (index: number) => {
