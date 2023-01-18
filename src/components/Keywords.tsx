@@ -26,19 +26,19 @@ const handleTitleClick = clickHandlerFactory(async (title: string) => (await axi
 
 export const Keywords: FC<KeywordsProps> = ({ keywords}) => {
   return (
-    <>
+    <ul className="flex flex-wrap justify-center items-center keywordsWrapper">
       {keywords.map((item, idx) => (
-        <div key={idx} className="px-4 py-2 flex flex-col justify-center items-center border-2 border-dotted border-current rounded-md">
-          <div>
+        <li key={idx} className="m-4 py-8 px-4 flex flex-col justify-center items-center text-white">
+          <div className="flex flex-wrap justify-center items-center">
             {item.data.map((word, wordIdx) => (
-              <button className="m-1 text-cyan italic hover:underline" key={wordIdx} onClick={handleWordClick}>{word}</button>
+              <button className="m-1 italic hover:underline" key={wordIdx} onClick={handleWordClick}>{word}</button>
             ))}
           </div>
           <div>
-            <button className="font-bold text-cyan hover:underline" onClick={handleTitleClick}>{item.title}</button>
+            <button className="m-1 font-bold hover:underline" onClick={handleTitleClick}>{item.title}</button>
           </div>
-        </div>
+        </li>
       ))}
-    </>
+    </ul>
   )
 };
