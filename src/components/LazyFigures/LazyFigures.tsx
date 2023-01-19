@@ -13,11 +13,11 @@ import classNames from 'classnames';
 
 interface LazyFiguresProps {
   figure: PlotParams;
-  lazyApi?: LazyFigureApi[];
-  keywords?: KeywordsData[];
+  lazyApi: LazyFigureApi[];
+  keywords: KeywordsData[];
 }
 
-export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi = [], keywords = [] }) => {
+export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi, keywords }) => {
   const [ figureUrl, setFigureUrl ] = useState('');
   const [ isLoading, setIsLoading ] = useState(false);
 

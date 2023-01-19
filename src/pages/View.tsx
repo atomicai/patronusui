@@ -77,14 +77,15 @@ export const View = () => {
                 ? (
                   <div key={index} className="w-full flex flex-col justify-center items-center">
                     {
-                      (Array.isArray(figures) ? figures : [{ figure: figures }]).map((item, itemIdx) => (
-                        <LazyFigures
-                          key={itemIdx}
-                          figure={('figure' in item) ? item.figure : item}
-                          keywords={'keywords' in item ? item.keywords : undefined}
-                          lazyApi={'lazy_figure_api' in item ? item.lazy_figure_api : undefined}
-                        />
-                      ))
+                      (Array.isArray(figures) ? (figures as PlotPayload[]) : [{ figure: figures }])
+                        .map((item, itemIdx) => (
+                          <LazyFigures
+                            key={itemIdx}
+                            figure={('figure' in item) ? item.figure : item}
+                            keywords={item.keywords || []}
+                            lazyApi={item.lazy_figure_api || []}
+                          />
+                        ))
                     }
                   </div>
                 )
