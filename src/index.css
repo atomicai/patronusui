@@ -325,3 +325,13 @@ li + li {
     border-right-color: transparent;
   }
 }
+
+.text-cyan {
+  color: cyan;
+}
+.text-near-orange {
+  color: #FB8B0B;
+}
+.text-near-gray {
+  color: gray;
+}

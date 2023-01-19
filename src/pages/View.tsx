@@ -13,11 +13,11 @@ import { useSetAtom, useAtom } from 'jotai'
 
 import axios from 'axios'
 
-import Plot, { PlotParams } from 'react-plotly.js'
+import { PlotParams } from 'react-plotly.js'
 import { file, plots, viewPayload } from '../contexts/UploadContext'
 import { NavLink } from 'react-router-dom'
 import { PlotPayload } from '../@types/view';
-import { Keywords } from '../components/Keywords';
+import { LazyFigures } from '../components/LazyFigures';
 
 export const View = () => {
   const setPlots = useSetAtom(plots)
@@ -77,22 +77,15 @@ export const View = () => {
                 ? (
                   <div key={index} className="w-full flex flex-col justify-center items-center">
                     {
-                      (Array.isArray(figures) ? figures : [{ figure: figures }]).map((item, itemIdx) => {
-                        const figure = ('figure' in item) ? item.figure : item;
-                        return (
-                          <div key={itemIdx} className="py-4 w-full flex flex-col justify-center items-center">
-                            <Plot
-                              data={figure.data}
-                              layout={figure.layout}
-                            />
-                            {('keywords' in item) && item.keywords?.length && (
-                              <div className="pt-2 pb-4 w-full flex justify-center items-center gap-4">
-                                <Keywords keywords={item.keywords} />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
+                      (Array.isArray(figures) ? (figures as PlotPayload[]) : [{ figure: figures }])
+                        .map((item, itemIdx) => (
+                          <LazyFigures
+                            key={itemIdx}
+                            figure={('figure' in item) ? item.figure : item}
+                            keywords={item.keywords || []}
+                            lazyApi={item.lazy_figure_api || []}
+                          />
+                        ))
                     }
                   </div>
                 )

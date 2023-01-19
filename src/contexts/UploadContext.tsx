@@ -11,3 +11,5 @@ export const file = atom<string>('')
 export const plots = atom<PlotParams[]>([])
 
 export const viewPayload = atom<ViewPayload[]>([])
+
+export const lazyPlots = atom<Record<string, PlotParams>>({});
