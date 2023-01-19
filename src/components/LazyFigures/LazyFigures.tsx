@@ -70,7 +70,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi = [], keywor
                 layout={currentFigure.layout}
               />
               {!figureUrl && !!keywords.length && (
-                <div className="pt-2 pb-4 w-full flex justify-center items-center gap-4">
+                <div className={`pt-2 pb-4 w-full flex justify-center items-center gap-4 ${styles.keywordsWrapper}`}>
                   <Keywords keywords={keywords} />
                 </div>
               )}
