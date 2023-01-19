@@ -12,7 +12,7 @@ import { UploadPayload, ViewPayload } from '../@types/view'
 import IloadDialog from '../components/IloadDialog'
 import UploadDialog from '../components/UploadDialog'
 import { useSetAtom, useAtom } from 'jotai'
-import { file, plots, viewPayload } from '../contexts/UploadContext'
+import { file, lazyPlots, plots, viewPayload } from '../contexts/UploadContext'
 import { NavLink, useNavigate } from 'react-router-dom'
 
 export const Home: React.FC = () => {
@@ -22,6 +22,7 @@ export const Home: React.FC = () => {
 
   const setPlots = useSetAtom(plots)
   const setFile = useSetAtom(file)
+  const setLazyPlots = useSetAtom(lazyPlots);
 
   const [plotsAtom] = useAtom(plots)
   const [popup, setPopup] = useState(false)
@@ -34,6 +35,8 @@ export const Home: React.FC = () => {
 
     setLoading(true)
     setOpen(false)
+
+    setLazyPlots({});
 
     const response: UploadPayload = await axios({
       method: 'post',

@@ -33,7 +33,13 @@ export interface KeywordsData {
   title: string;
 }
 
+export interface LazyFigureApi {
+  api: string;
+  title: string;
+}
+
 export interface PlotPayload {
   figure: PlotParams;
   keywords?: KeywordsData[];
+  lazy_figure_api?: LazyFigureApi[];
 }

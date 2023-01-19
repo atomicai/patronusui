@@ -2,7 +2,7 @@ import { FC, SyntheticEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import copyToClipboard from 'clipboard-copy';
-import { KeywordsData } from '../@types/view';
+import { KeywordsData } from '../../@types/view';
 
 interface KeywordsProps {
   keywords: KeywordsData[];
