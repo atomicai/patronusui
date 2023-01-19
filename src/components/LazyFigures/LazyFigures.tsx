@@ -80,12 +80,18 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi = [], keywor
       </div>
       {!!lazyApi.length && (
         <div className="flex flex-col items-center">
-          {buttons.map((item) => {
+          {buttons.map((item, idx) => {
             const isCurrent = (figureUrl === item.api);
             return (
               <button
                 key={item.api}
-                className={classNames('m-1 h-8 w-8 hover:text-white', { 'text-primary': !isCurrent, 'text-white': isCurrent })}
+                className={classNames('m-1 h-8 w-8 hover:text-white', {
+                  'text-white': isCurrent,
+                  'text-primary': !isCurrent && ((idx % 4) === 0),
+                  'text-cyan': !isCurrent && ((idx % 4) === 1),
+                  'text-near-orange': !isCurrent && ((idx % 4) === 2),
+                  'text-near-gray': !isCurrent && ((idx % 4) === 3),
+                })}
                 disabled={isLoading || isCurrent}
                 onClick={() => handleButtonClick(item.api)}
                 title={item.title}
