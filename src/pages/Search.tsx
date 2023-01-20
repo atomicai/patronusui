@@ -1,28 +1,30 @@
 import {
-  PresentationChartBarIcon,
-  HomeIcon,
-  HandThumbUpIcon,
-  HandThumbDownIcon,
-  XMarkIcon,
-  UserCircleIcon,
+  ArrowDownTrayIcon,
   CalendarDaysIcon,
   CheckCircleIcon,
-  ArrowDownTrayIcon
+  HandThumbDownIcon,
+  HandThumbUpIcon,
+  HomeIcon,
+  PresentationChartBarIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-import { Doc, Data } from '../@types/search'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { Data, Doc } from '../@types/search'
 
-import { known as k, unknown as u } from '../utils/removable/text'
+import { arrayUnion, doc, updateDoc } from '@firebase/firestore'
+import { Tooltip } from '@mui/material'
 import { useAtom, useSetAtom } from 'jotai'
-import { unknownPassages } from '../contexts/UnknownContext'
 import { DateRangePicker } from 'rsuite'
+import { currentUser } from '../contexts/AuthContext'
+import { db } from '../firebase'
 import { Ranges } from '../utils/dates'
-import { Link, Tooltip } from '@mui/material'
+import { known as k } from '../utils/removable/text'
+import ProfileIcon from './auth/components/ProfileIcon'
 
 type testEx = {
   title: string
@@ -36,7 +38,8 @@ export const Search: React.FC = () => {
   const [favorite, setFavorite] = useState<Doc[]>([])
   // const [unknown, setUnknown] = useState<Doc[]>([])
   const [openTimestamp, setOpenTimestamp] = useState<boolean>(false)
-
+  const [userAtom] = useAtom(currentUser)
+  const setUserAtom = useSetAtom(currentUser)
   const [dateRange, setDateRange] = useState<[Date, Date]>([
     new Date(),
     new Date()
@@ -59,12 +62,10 @@ export const Search: React.FC = () => {
   useEffect(() => {
     setTimeout(() => {
       setAnimation('second')
-      console.log('second')
     }, 3000)
 
     setTimeout(() => {
       setAnimation('first')
-      console.log('first')
     }, 6000)
   }, [])
 
@@ -87,6 +88,17 @@ export const Search: React.FC = () => {
     if (withTimestamp) {
       setFirstRender(true)
 
+      if (userAtom) {
+        const docRef = doc(db, 'users', userAtom.uid)
+        await updateDoc(docRef, {
+          searchHistory: arrayUnion(inputValue)
+        })
+        setUserAtom({
+          ...userAtom,
+          searchHistory: [...userAtom.searchHistory, inputValue]
+        })
+      }
+
       const response: Data = await axios
         .post('/searching', {
           text: inputValue,
@@ -102,6 +114,18 @@ export const Search: React.FC = () => {
 
     if (!withTimestamp) {
       setFirstRender(true)
+
+      if (userAtom) {
+        const docRef = doc(db, 'users', userAtom.uid)
+        await updateDoc(docRef, {
+          searchHistory: arrayUnion(inputValue)
+        })
+        setUserAtom({
+          ...userAtom,
+          searchHistory: [...userAtom.searchHistory, inputValue]
+        })
+      }
+
       const response: Data = await axios
         .post('/searching', {
           text: inputValue
@@ -307,12 +331,8 @@ export const Search: React.FC = () => {
               />
             </>
           )}
-          <NavLink
-            to={'/iprofile'}
-            className=" text-primary hover:cursor-pointer hover:text-white h-8 w-8"
-          >
-            <UserCircleIcon />
-          </NavLink>
+
+          <ProfileIcon />
         </div>
       </nav>
 
