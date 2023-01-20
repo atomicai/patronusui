@@ -1,28 +1,28 @@
 import {
-  PresentationChartBarIcon,
-  HomeIcon,
-  HandThumbUpIcon,
-  HandThumbDownIcon,
-  XMarkIcon,
-  UserCircleIcon,
+  ArrowDownTrayIcon,
   CalendarDaysIcon,
   CheckCircleIcon,
-  ArrowDownTrayIcon
+  HandThumbDownIcon,
+  HandThumbUpIcon,
+  HomeIcon,
+  PresentationChartBarIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-import { Doc, Data } from '../@types/search'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { Data, Doc } from '../@types/search'
 
-import { known as k, unknown as u } from '../utils/removable/text'
-import { useAtom, useSetAtom } from 'jotai'
-import { unknownPassages } from '../contexts/UnknownContext'
+import { Tooltip } from '@mui/material'
+import { useAtom } from 'jotai'
 import { DateRangePicker } from 'rsuite'
+import { currentUser } from '../contexts/AuthContext'
 import { Ranges } from '../utils/dates'
-import { Link, Tooltip } from '@mui/material'
+import { known as k } from '../utils/removable/text'
+import ProfileIcon from './auth/components/ProfileIcon'
 
 type testEx = {
   title: string
@@ -36,6 +36,7 @@ export const Search: React.FC = () => {
   const [favorite, setFavorite] = useState<Doc[]>([])
   // const [unknown, setUnknown] = useState<Doc[]>([])
   const [openTimestamp, setOpenTimestamp] = useState<boolean>(false)
+  const [userAtom] = useAtom(currentUser)
 
   const [dateRange, setDateRange] = useState<[Date, Date]>([
     new Date(),
@@ -59,12 +60,10 @@ export const Search: React.FC = () => {
   useEffect(() => {
     setTimeout(() => {
       setAnimation('second')
-      console.log('second')
     }, 3000)
 
     setTimeout(() => {
       setAnimation('first')
-      console.log('first')
     }, 6000)
   }, [])
 
@@ -307,12 +306,8 @@ export const Search: React.FC = () => {
               />
             </>
           )}
-          <NavLink
-            to={'/iprofile'}
-            className=" text-primary hover:cursor-pointer hover:text-white h-8 w-8"
-          >
-            <UserCircleIcon />
-          </NavLink>
+
+          <ProfileIcon />
         </div>
       </nav>
 
