@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import styles from './Sign.module.css'
+import { NavLink, Navigate } from 'react-router-dom'
 
 const USERNAME_REGEX = /[A-z0-9]{4,20}$/
 const PASSWORD_REGEX = /[A-z0-9]{4,20}$/
@@ -10,6 +11,8 @@ function SignUp() {
 
   const [password, setPassword] = useState<string>('')
   const [isValidPassword, setIsValidPassword] = useState<boolean>(false)
+
+  const [isSignedUp, setIsSignedUp] = useState<boolean>()
 
   const [message, setMessage] = useState<string>('')
 
@@ -44,7 +47,12 @@ function SignUp() {
       )
       return
     }
+    setIsSignedUp(true)
     /* Put auth job*/
+  }
+
+  if (isSignedUp) {
+    return <Navigate replace to="/isignin" />
   }
 
   return (
@@ -76,9 +84,12 @@ function SignUp() {
 
         <button className={styles.enabledButton}>Sign up</button>
       </form>
-      {/*Put router link*/}
+
       <p className={styles.p}>
-        Already have an account? <span className={styles.link}>Sign in.</span>
+        Already have an account?{' '}
+        <NavLink to={'/isignin'} className={styles.link}>
+          <span>Sign in.</span>
+        </NavLink>
       </p>
     </section>
   )

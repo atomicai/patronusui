@@ -8,12 +8,20 @@ import {
   PresentationChartBarIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Navigate } from 'react-router-dom'
 import styles from './Profile.module.css'
 
 function Profile() {
   const [username, setUsername] = useAtom(usernameAtom)
   const [isSignedIn, setIsSignedIn] = useAtom(isSignedInAtom)
+
+  const logout = () => {
+    setIsSignedIn(false)
+  }
+
+  if (!isSignedIn) {
+    return <Navigate replace to="/isignin" />
+  }
 
   return (
     <main className={styles.main}>
@@ -31,7 +39,7 @@ function Profile() {
           <NavLink to={'/isearch'} className={styles.icon}>
             <MagnifyingGlassIcon />
           </NavLink>
-          <button className={styles.icon}>
+          <button onClick={logout} className={styles.icon}>
             <ArrowRightOnRectangleIcon />
           </button>
         </div>

@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import styles from './Sign.module.css'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom } from 'jotai'
 import { usernameAtom, isSignedInAtom } from '../contexts/User'
+import { Navigate, NavLink } from 'react-router-dom'
 
 function SignIn() {
-  const setIsSignedIn = useSetAtom(isSignedInAtom)
+  const [isSignedIn, setIsSignedIn] = useAtom(isSignedInAtom)
   const [username, setUsername] = useAtom(usernameAtom)
   const [password, setPassword] = useState<string>('')
   const [message, setMessage] = useState<string>('')
@@ -17,8 +18,12 @@ function SignIn() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSignedIn(true)
     /* Put auth job*/
+    setIsSignedIn(true)
+  }
+
+  if (isSignedIn) {
+    return <Navigate replace to="/iprofile" />
   }
 
   return (
@@ -53,9 +58,11 @@ function SignIn() {
         <button className={styles.enabledButton}>Sign in</button>
       </form>
 
-      {/*Put router link*/}
       <p className={styles.p}>
-        Need an account? <span className={styles.link}>Sign up.</span>
+        Need an account?{' '}
+        <NavLink to={'/isignup'} className={styles.link}>
+          <span>Sign up.</span>
+        </NavLink>
       </p>
     </section>
   )
