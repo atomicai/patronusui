@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .main {
+    @apply h-screen w-screen flex flex-col items-center justify-start;
+  }
+  .nav {
+    @apply h-[8%] w-full flex justify-evenly items-center;
+  }
+  .navSide {
+    @apply w-[10%] flex justify-center items-center;
+  }
+  .navGap {
+    @apply w-4/5;
+  }
+  .icon {
+    @apply h-8 w-8 mr-2 text-primary cursor-pointer hover:text-white;
+  }
+  .iconUser {
+    @apply h-8 w-8 text-white;
+  }
+  .section {
+    @apply mt-96 flex flex-col items-center gap-2;
+  }
+  .p {
+    @apply text-lg text-white;
+  }
+}
