@@ -17,13 +17,17 @@ const App: React.FC = () => {
         const docSnap = await getDoc(userRef)
 
         if (docSnap.exists()) {
-          setUserAtom({ ...user, bookLover: docSnap.data().bookLover })
+          setUserAtom({
+            ...user,
+            profileImage: docSnap.data().profileImage,
+            searchHistory: docSnap.data().searchHistory
+          })
         } else {
           await setDoc(doc(db, 'users', user.uid), {
-            bookLover: true,
-            potterLover: true
+            profileImage: user.uid,
+            searchHistory: []
           })
-          setUserAtom({ ...user, bookLover: true })
+          setUserAtom({ ...user, profileImage: user.uid, searchHistory: [] })
         }
       } else {
         setUserAtom(null)

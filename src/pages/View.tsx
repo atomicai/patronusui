@@ -3,21 +3,21 @@ import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   HomeIcon,
-  MagnifyingGlassIcon,
-  UserCircleIcon
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import { Link, Tooltip } from '@mui/material'
 
+import { useAtom, useSetAtom } from 'jotai'
 import { useState } from 'react'
-import { useSetAtom, useAtom } from 'jotai'
 
 import axios from 'axios'
 
 import { PlotParams } from 'react-plotly.js'
-import { file, plots, viewPayload } from '../contexts/UploadContext'
 import { NavLink } from 'react-router-dom'
-import { PlotPayload } from '../@types/view';
-import { LazyFigures } from '../components/LazyFigures';
+import { PlotPayload } from '../@types/view'
+import { LazyFigures } from '../components/LazyFigures'
+import { file, plots, viewPayload } from '../contexts/UploadContext'
+import ProfileIcon from './auth/components/ProfileIcon'
 
 export const View = () => {
   const setPlots = useSetAtom(plots)
@@ -72,24 +72,29 @@ export const View = () => {
       <section className="h-full w-[92%]">
         <>
           <div className="w-full h-[95%] overflow-auto">
-            {plotsAtom.map((figures: PlotParams | (PlotPayload | PlotParams)[], index: number) =>
-              (index === sliderIndex)
-                ? (
-                  <div key={index} className="w-full flex flex-col justify-center items-center">
-                    {
-                      (Array.isArray(figures) ? (figures as PlotPayload[]) : [{ figure: figures }])
-                        .map((item, itemIdx) => (
-                          <LazyFigures
-                            key={itemIdx}
-                            figure={('figure' in item) ? item.figure : item}
-                            keywords={item.keywords || []}
-                            lazyApi={item.lazy_figure_api || []}
-                          />
-                        ))
-                    }
+            {plotsAtom.map(
+              (
+                figures: PlotParams | (PlotPayload | PlotParams)[],
+                index: number
+              ) =>
+                index === sliderIndex ? (
+                  <div
+                    key={index}
+                    className="w-full flex flex-col justify-center items-center"
+                  >
+                    {(Array.isArray(figures)
+                      ? (figures as PlotPayload[])
+                      : [{ figure: figures }]
+                    ).map((item, itemIdx) => (
+                      <LazyFigures
+                        key={itemIdx}
+                        figure={'figure' in item ? item.figure : item}
+                        keywords={item.keywords || []}
+                        lazyApi={item.lazy_figure_api || []}
+                      />
+                    ))}
                   </div>
-                )
-                : null
+                ) : null
             )}
           </div>
           <div className="w-full h-[5%] pt-2 inline-flex justify-center">
@@ -125,7 +130,7 @@ export const View = () => {
           to={'/iprofile'}
           className=" text-primary hover:cursor-pointer hover:text-white h-8 w-8"
         >
-          <UserCircleIcon />
+          <ProfileIcon />
         </NavLink>
 
         <Tooltip title="Download file" arrow>

@@ -16,10 +16,12 @@ import { toast } from 'react-hot-toast'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Data, Doc } from '../@types/search'
 
+import { arrayUnion, doc, updateDoc } from '@firebase/firestore'
 import { Tooltip } from '@mui/material'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { DateRangePicker } from 'rsuite'
 import { currentUser } from '../contexts/AuthContext'
+import { db } from '../firebase'
 import { Ranges } from '../utils/dates'
 import { known as k } from '../utils/removable/text'
 import ProfileIcon from './auth/components/ProfileIcon'
@@ -37,7 +39,7 @@ export const Search: React.FC = () => {
   // const [unknown, setUnknown] = useState<Doc[]>([])
   const [openTimestamp, setOpenTimestamp] = useState<boolean>(false)
   const [userAtom] = useAtom(currentUser)
-
+  const setUserAtom = useSetAtom(currentUser)
   const [dateRange, setDateRange] = useState<[Date, Date]>([
     new Date(),
     new Date()
@@ -86,6 +88,17 @@ export const Search: React.FC = () => {
     if (withTimestamp) {
       setFirstRender(true)
 
+      if (userAtom) {
+        const docRef = doc(db, 'users', userAtom.uid)
+        await updateDoc(docRef, {
+          searchHistory: arrayUnion(inputValue)
+        })
+        setUserAtom({
+          ...userAtom,
+          searchHistory: [...userAtom.searchHistory, inputValue]
+        })
+      }
+
       const response: Data = await axios
         .post('/searching', {
           text: inputValue,
@@ -101,6 +114,18 @@ export const Search: React.FC = () => {
 
     if (!withTimestamp) {
       setFirstRender(true)
+
+      if (userAtom) {
+        const docRef = doc(db, 'users', userAtom.uid)
+        await updateDoc(docRef, {
+          searchHistory: arrayUnion(inputValue)
+        })
+        setUserAtom({
+          ...userAtom,
+          searchHistory: [...userAtom.searchHistory, inputValue]
+        })
+      }
+
       const response: Data = await axios
         .post('/searching', {
           text: inputValue
