@@ -61,7 +61,7 @@ function SignIn() {
       <p className={styles.p}>
         Need an account?{' '}
         <NavLink to={'/isignup'} className={styles.link}>
-          <span>Sign up.</span>
+          <span>Sign up</span>
         </NavLink>
       </p>
     </section>

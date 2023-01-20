@@ -22,7 +22,7 @@
     @apply w-full pb-3 text-xl text-white;
   }
   .input {
-    @apply h-9 w-80 pl-2 bg-secondary text-xl text-white border-b border-primary outline-none;
+    @apply h-9 w-80 pl-2 bg-secondary text-xl text-white border-b border-primary outline-none focus:border-b-2;
   }
   .enabledButton {
     @apply w-full py-3 bg-primary text-xl text-white rounded-lg hover:shadow-inner hover:shadow-secondary;
