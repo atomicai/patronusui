@@ -1,12 +1,12 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { Home } from '../pages/Home'
+import { createBrowserRouter } from 'react-router-dom'
 import { Main } from '../layouts/Main'
-import { Search } from '../pages/Search'
+import { Home } from '../pages/Home'
+import SignIn from '../pages/auth/SignIn'
+import SignUp from '../pages/auth/SignUp'
+import { Search } from '../pages/dashboard/Search'
+import { View } from '../pages/dashboard/View'
+import Profile from '../pages/user/Profile'
 import { Error } from '../pages/util/Error'
-import { View } from '../pages/View'
-import Profile from '../pages/Profile'
-import SignIn from '../pages/SignIn'
-import SignUp from '../pages/SignUp'
 
 const router = createBrowserRouter([
   {

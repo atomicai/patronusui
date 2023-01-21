@@ -1,6 +1,4 @@
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
-import { db } from '../../../../firebase'
+import { GoogleAuthProvider, getAuth, signInWithPopup } from 'firebase/auth'
 
 const GoogleIcon = () => {
   const provider = new GoogleAuthProvider()
@@ -11,7 +9,7 @@ const GoogleIcon = () => {
       .then((result) => {
         const user = result.user
 
-        return user
+        window.location.href = '/isearch'
         // ...
       })
 
@@ -28,8 +26,11 @@ const GoogleIcon = () => {
   }
 
   return (
-    <div onClick={handleAuth}>
-      <img src="images/google.svg" />
+    <div className="flex flex-col w-full items-center">
+      <span className="w-1/6 border-primary border-b-2 mb-4"></span>
+      <div onClick={handleAuth} className="w-12 h-12 hover:cursor-pointer">
+        <img src="images/google.svg" />
+      </div>
     </div>
   )
 }

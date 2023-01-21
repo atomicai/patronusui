@@ -14,10 +14,10 @@ import axios from 'axios'
 
 import { PlotParams } from 'react-plotly.js'
 import { NavLink } from 'react-router-dom'
-import { PlotPayload } from '../@types/view'
-import { LazyFigures } from '../components/LazyFigures'
-import { file, plots, viewPayload } from '../contexts/UploadContext'
-import ProfileIcon from './auth/components/ProfileIcon'
+import { PlotPayload } from '../../@types/view'
+import { LazyFigures } from '../../components/LazyFigures'
+import ProfileIcon from '../../components/ProfileIcon'
+import { file, plots, viewPayload } from '../../contexts/UploadContext'
 
 export const View = () => {
   const setPlots = useSetAtom(plots)

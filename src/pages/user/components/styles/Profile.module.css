@@ -22,7 +22,7 @@
     @apply h-8 w-8 text-white;
   }
   .section {
-    @apply mt-96 flex flex-col items-center gap-2;
+    @apply flex items-center justify-center w-full h-full;
   }
   .p {
     @apply text-lg text-white;

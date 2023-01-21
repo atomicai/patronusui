@@ -1,10 +1,11 @@
-import * as React from 'react'
 import Drawer from '@mui/material/Drawer'
+import * as React from 'react'
 
 import { ShieldExclamationIcon } from '@heroicons/react/24/outline'
 
-import { useAtom, useSetAtom } from 'jotai'
-import { unknownPassages } from '../../contexts/UnknownContext'
+import { useAtom } from 'jotai'
+import { Doc } from '../../@types/search'
+import { unknownPassages } from './UnknownContext'
 
 type Anchor = 'top' | 'left' | 'bottom' | 'right'
 
@@ -46,7 +47,7 @@ export default function UnknownDrawer() {
   const list = (anchor: Anchor) => (
     <div className="w-fit bg-secondary" role="presentation">
       <div className="p-4">
-        {unknownPassagesAtom.map((item, index) => (
+        {unknownPassagesAtom.map((item: Doc, index: number) => (
           <li
             key={index}
             className={'text-white mx-4 hover:cursor-pointer'}

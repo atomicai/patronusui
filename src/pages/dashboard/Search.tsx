@@ -14,17 +14,17 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Data, Doc } from '../@types/search'
+import { Data, Doc } from '../../@types/search'
 
 import { arrayUnion, doc, updateDoc } from '@firebase/firestore'
 import { Tooltip } from '@mui/material'
 import { useAtom, useSetAtom } from 'jotai'
 import { DateRangePicker } from 'rsuite'
-import { currentUser } from '../contexts/AuthContext'
-import { db } from '../firebase'
-import { Ranges } from '../utils/dates'
-import { known as k } from '../utils/removable/text'
-import ProfileIcon from './auth/components/ProfileIcon'
+import ProfileIcon from '../../components/ProfileIcon'
+import { currentUser } from '../../contexts/AuthContext'
+import { db } from '../../firebase'
+import { Ranges } from '../../utils/dates'
+import { known as k } from '../../utils/removable/text'
 
 type testEx = {
   title: string
