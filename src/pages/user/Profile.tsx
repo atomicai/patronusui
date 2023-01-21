@@ -1,27 +1,22 @@
-import React from 'react'
-import { useAtom } from 'jotai'
-import { usernameAtom, isSignedInAtom } from '../contexts/User'
 import {
-  UserIcon,
   ArrowRightOnRectangleIcon,
   HomeIcon,
-  PresentationChartBarIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  PresentationChartBarIcon
 } from '@heroicons/react/24/outline'
-import { NavLink, Navigate } from 'react-router-dom'
-import styles from './Profile.module.css'
+import { signOut } from 'firebase/auth'
+import { useAtom } from 'jotai'
+import { NavLink } from 'react-router-dom'
+import ProfileIcon from '../../components/ProfileIcon'
+import { currentUser } from '../../contexts/AuthContext'
+import { auth } from '../../firebase'
+import styles from './components/styles/Profile.module.css'
 
 function Profile() {
-  const [username, setUsername] = useAtom(usernameAtom)
-  const [isSignedIn, setIsSignedIn] = useAtom(isSignedInAtom)
-
-  const logout = () => {
-    setIsSignedIn(false)
-  }
-
-  if (!isSignedIn) {
-    return <Navigate replace to="/isignin" />
-  }
+  const [userAtom] = useAtom(currentUser)
+  // if (!isSignedIn) {
+  //   return <Navigate replace to="/isignin" />
+  // }
 
   return (
     <main className={styles.main}>
@@ -39,14 +34,16 @@ function Profile() {
           <NavLink to={'/isearch'} className={styles.icon}>
             <MagnifyingGlassIcon />
           </NavLink>
-          <button onClick={logout} className={styles.icon}>
+          <button onClick={() => signOut(auth)} className={styles.icon}>
             <ArrowRightOnRectangleIcon />
           </button>
         </div>
       </nav>
       <section className={styles.section}>
-        <UserIcon className={styles.iconUser} />
-        <p className={styles.p}>{username}</p>
+        <div className="w-1/6 h-1/6 flex flex-col items-center justify-evenly">
+          <ProfileIcon size={50} className="h-12 w-12" />
+          <p className={styles.p}>{userAtom?.email ?? 'signin to view'}</p>
+        </div>
       </section>
     </main>
   )
