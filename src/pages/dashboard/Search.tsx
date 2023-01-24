@@ -13,8 +13,8 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
+import { Doc, Data, DocPart } from '../@types/search'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Data, Doc } from '../../@types/search'
 
 import { arrayUnion, doc, updateDoc } from '@firebase/firestore'
 import { Tooltip } from '@mui/material'
@@ -25,6 +25,7 @@ import { currentUser } from '../../contexts/AuthContext'
 import { db } from '../../firebase'
 import { Ranges } from '../../utils/dates'
 import { known as k } from '../../utils/removable/text'
+import { wrapTextParts } from '../utils/text';
 
 type testEx = {
   title: string
@@ -69,10 +70,10 @@ export const Search: React.FC = () => {
     }, 6000)
   }, [])
 
-  const handleUnknown = (index: number, text: string) => {
+  const handleUnknown = (index: number, text: string, highlight?: DocPart[]) => {
     isUnknown === index ? setIsUnknown(-1) : setIsUnknown(index)
 
-    setFullText(text)
+    setFullText(wrapTextParts(text, highlight))
   }
 
   const [checked, setChecked] = useState(false)
@@ -367,7 +368,7 @@ export const Search: React.FC = () => {
                           <h3 className="h3-element">{item.title}</h3>
                           <div
                             className="div-element hover:cursor-pointer"
-                            onClick={() => setFullText(item.text)}
+                            onClick={() => setFullText(wrapTextParts(item.text, item.highlight))}
                           >
                             {item.text}
                           </div>
@@ -413,7 +414,7 @@ export const Search: React.FC = () => {
                           <span className="list-element">{item.upvote}</span>
                           <span
                             className={`max-w-[240px] hover:cursor-pointer truncate`}
-                            onClick={() => handleUnknown(index, item.text)}
+                            onClick={() => handleUnknown(index, item.text, item.highlight)}
                           >
                             {item.text}
                           </span>
@@ -440,7 +441,7 @@ export const Search: React.FC = () => {
                         onClick={() => setFullText(null)}
                       />
                     </span>
-                    <span className="white-space">{fullText}</span>
+                    <span className="highlitedText" dangerouslySetInnerHTML={{ __html: fullText }}></span>
                   </div>
                 )}
               </ul>

@@ -10,12 +10,18 @@ export type Passage = {
   docs: Doc[]
 }
 
+export type DocPart = {
+  lo: number;
+  hi: number;
+}
+
 export type Doc = {
-  title: string
+  title?: string
   text: string
   score: string
   timestamp?: string
   upvote?: number
+  highlight?: DocPart[];
 }
 
 export type DataFromServer = {
