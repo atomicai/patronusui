@@ -13,7 +13,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-import { Doc, Data, DocPart } from '../@types/search'
+import { Doc, Data, DocPart } from '../../@types/search'
 import { NavLink, useNavigate } from 'react-router-dom'
 
 import { arrayUnion, doc, updateDoc } from '@firebase/firestore'
@@ -25,7 +25,7 @@ import { currentUser } from '../../contexts/AuthContext'
 import { db } from '../../firebase'
 import { Ranges } from '../../utils/dates'
 import { known as k } from '../../utils/removable/text'
-import { wrapTextParts } from '../utils/text';
+import { wrapTextParts } from '../../utils/text';
 
 type testEx = {
   title: string
