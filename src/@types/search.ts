@@ -13,6 +13,7 @@ export type Passage = {
 export type DocPart = {
   lo: number;
   hi: number;
+  score?: number;
 }
 
 export type Doc = {
