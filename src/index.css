@@ -335,3 +335,7 @@ li + li {
 .text-near-gray {
   color: gray;
 }
+
+.highlitedText span {
+  background-color: darkcyan;
+}
