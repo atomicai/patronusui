@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import Plot, { PlotParams } from 'react-plotly.js';
 import { LazyFigureApi } from '../../@types/view';
 import { Spinner } from '../Spinner';
@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import styles from './LazyFigures.module.css';
 import { ChartBarSquareIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
+import { SearchResult } from '../SearchResult';
 
 interface LazyFiguresProps {
   figure: PlotParams;
@@ -17,11 +18,13 @@ interface LazyFiguresProps {
 
 export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
   const [ figureUrl, setFigureUrl ] = useState('');
-  const [ isLoading, setIsLoading ] = useState(false);
+  const [ isFigureLoading, setIsFigureLoading ] = useState(false);
+  const [ topic, setTopic ] = useState('');
+  const [ isTopicLoading, setIsTopicLoading ] = useState(false);
 
   useEffect(() => {
     setFigureUrl('');
-    setIsLoading(false);
+    setIsFigureLoading(false);
   }, [figure, lazyApi]);
 
   const [cachedLazyPlots, setCachedLazyPlots] = useAtom(lazyPlots);
@@ -37,7 +40,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
     }
 
     if (!cachedLazyPlots[url]) {
-      setIsLoading(true);
+      setIsFigureLoading(true);
       try {
         const { data } = await axios.post<PlotParams>(url);
         setCachedLazyPlots({
@@ -47,9 +50,24 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
       } catch (e) {
         toast.error((e as Error).message);
       }
-      setIsLoading(false);
+      setIsFigureLoading(false);
     }
     setFigureUrl(url);
+  };
+
+  const handleFigureDoubleClick = async (e: SyntheticEvent) => {
+    const parentElement = (e.target as Element).parentElement;
+    if (parentElement?.classList.contains('traces')) {
+      const clickedTopic = parentElement.getElementsByTagName('text')[0]?.textContent;
+      if (clickedTopic) {
+        setTopic(clickedTopic);
+        setIsTopicLoading(true);
+        // @TODO: request data
+        setIsTopicLoading(false);
+      }
+    } else {
+      setTopic('');
+    }
   };
 
   const currentFigure = figureUrl ? cachedLazyPlots[figureUrl] : figure;
@@ -57,17 +75,24 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
 
   return (
     <div className={`grid grid-cols-12 gap-4 my-4 ${styles.wrapper}`}>
-      <div className="col-span-11 w-full flex flex-col justify-center items-center">
-      {
-        isLoading
-          ? <Spinner />
-          : (
-            <Plot
-              data={currentFigure.data}
-              layout={currentFigure.layout}
-            />
-          )
-      }
+      <div className="col-span-11 w-full flex flex-col justify-center items-center" onDoubleClick={handleFigureDoubleClick}>
+        {
+          isFigureLoading
+            ? <Spinner />
+            : (
+              <>
+                <Plot
+                  data={currentFigure.data}
+                  layout={currentFigure.layout}
+                />
+                {topic && (
+                  <div className={`pt-2 pb-4 px-2 w-full ${styles.topicWrapper}`}>
+                    {isTopicLoading ? <Spinner /> : <SearchResult text={topic} />}
+                  </div>
+                )}
+              </>
+            )
+        }
       </div>
       {!!lazyApi.length && (
         <div className="flex flex-col items-center">
@@ -83,7 +108,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                   'text-near-orange': !isCurrent && ((idx % 4) === 2),
                   'text-near-gray': !isCurrent && ((idx % 4) === 3),
                 })}
-                disabled={isLoading || isCurrent}
+                disabled={isFigureLoading || isCurrent}
                 onClick={() => handleButtonClick(item.api)}
                 title={item.title}
               >

@@ -2,6 +2,6 @@
     min-width: 1365px;  /* taking into consideration explicitly defined plot width (1250px) */
     min-height: 450px;  /* prevent space collapse when spinner spinner is shown */
 }
-.keywordsWrapper {
+.topicWrapper {
     max-width: 1250px;
 }
