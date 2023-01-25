@@ -4,13 +4,14 @@ import React, { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
+import Message from './components/Message'
 import styles from './components/styles/Sign.module.css'
 
 const USERNAME_REGEX = /[A-z0-9]{4,20}$/
 const PASSWORD_REGEX = /[A-z0-9]{4,20}$/
 
 function SignUp() {
-  const [message, setMessage] = useState<string>('')
+  const [messageContent, setMessageContent] = useState<string>('')
 
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -28,11 +29,12 @@ function SignUp() {
   // }, [password])
 
   useEffect(() => {
-    setMessage('')
+    setMessageContent('')
   }, [emailRef.current?.value, passwordRef.current?.value])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
     if (
       emailRef.current?.value === undefined ||
       passwordRef.current?.value === undefined
@@ -40,7 +42,7 @@ function SignUp() {
       return
 
     if (!PASSWORD_REGEX.test(passwordRef.current?.value)) {
-      setMessage(
+      setMessageContent(
         'Incorrect password. 4 to 20 characters. Letters and numbers allowed.'
       )
       return
@@ -59,7 +61,7 @@ function SignUp() {
         // ...
       })
       .catch((error: FirebaseError) => {
-        setMessage(error.message)
+        setMessageContent(error.message)
         // ..
       })
   }
@@ -71,7 +73,9 @@ function SignUp() {
   return (
     <section className={styles.section}>
       <h1 className={styles.header}>Sign up for Patronum</h1>
-      {!!message.length && <div className={styles.message}>{message}</div>}
+      
+      {!!messageContent.length && <Message content={messageContent} />}
+      
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
           <p className={styles.labelContent}>Username</p>
