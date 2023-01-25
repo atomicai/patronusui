@@ -10,6 +10,7 @@ import styles from './LazyFigures.module.css';
 import { ChartBarSquareIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import { SearchResult } from '../SearchResult';
+import { Data, Doc } from '../../@types/search';
 
 interface LazyFiguresProps {
   figure: PlotParams;
@@ -21,6 +22,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
   const [ isFigureLoading, setIsFigureLoading ] = useState(false);
   const [ topic, setTopic ] = useState('');
   const [ isTopicLoading, setIsTopicLoading ] = useState(false);
+  const [ docs, setDocs ] = useState<Doc[]>([]);
 
   useEffect(() => {
     setFigureUrl('');
@@ -33,6 +35,8 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
     if (url === figureUrl) {
       return;
     }
+
+    setTopic('');
 
     if (!url) {
       setFigureUrl('');
@@ -62,7 +66,12 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
       if (clickedTopic) {
         setTopic(clickedTopic);
         setIsTopicLoading(true);
-        // @TODO: request data
+        try {
+          const { data } = await axios.post<Data>('/viewing_representation', { topic_name: topic });
+          setDocs(data.docs);
+        } catch (e) {
+          toast.error((e as Error).message);
+        }
         setIsTopicLoading(false);
       }
     } else {
@@ -86,8 +95,8 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                   layout={currentFigure.layout}
                 />
                 {topic && (
-                  <div className={`pt-2 pb-4 px-2 w-full ${styles.topicWrapper}`}>
-                    {isTopicLoading ? <Spinner /> : <SearchResult text={topic} />}
+                  <div className={`pt-2 pb-4 px-2 w-full  flex flex-col justify-center items-center ${styles.topicWrapper}`}>
+                    {isTopicLoading ? <Spinner /> : <SearchResult text={topic} found={docs} />}
                   </div>
                 )}
               </>

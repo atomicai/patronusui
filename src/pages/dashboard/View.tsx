@@ -80,7 +80,7 @@ export const View = () => {
                 index === sliderIndex ? (
                   <div
                     key={index}
-                    className="w-full flex flex-col justify-center items-center"
+                    className="w-full flex flex-col justify-center"
                   >
                     {(Array.isArray(figures)
                       ? (figures as PlotPayload[])

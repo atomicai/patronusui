@@ -4,4 +4,5 @@
 }
 .topicWrapper {
     max-width: 1250px;
+    min-height: 10em;
 }
