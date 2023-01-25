@@ -71,7 +71,7 @@ export const View = () => {
       </nav>
       <section className="h-full w-[92%]">
         <>
-          <div className="w-full h-[95%] overflow-auto">
+          <div className="w-full h-[95%] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto">
             {plotsAtom.map(
               (
                 figures: PlotParams | (PlotPayload | PlotParams)[],
