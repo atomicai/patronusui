@@ -1,12 +1,11 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import Plot, { PlotParams } from 'react-plotly.js';
-import { KeywordsData, LazyFigureApi } from '../../@types/view';
+import { LazyFigureApi } from '../../@types/view';
 import { Spinner } from '../Spinner';
 import { useAtom } from 'jotai';
 import { lazyPlots } from '../../contexts/UploadContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Keywords } from './Keywords';
 import styles from './LazyFigures.module.css';
 import { ChartBarSquareIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
@@ -14,17 +13,16 @@ import classNames from 'classnames';
 interface LazyFiguresProps {
   figure: PlotParams;
   lazyApi: LazyFigureApi[];
-  keywords: KeywordsData[];
 }
 
-export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi, keywords }) => {
+export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
   const [ figureUrl, setFigureUrl ] = useState('');
   const [ isLoading, setIsLoading ] = useState(false);
 
   useEffect(() => {
     setFigureUrl('');
     setIsLoading(false);
-  }, [figure, lazyApi, keywords]);
+  }, [figure, lazyApi]);
 
   const [cachedLazyPlots, setCachedLazyPlots] = useAtom(lazyPlots);
 
@@ -64,17 +62,10 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi, keywords })
         isLoading
           ? <Spinner />
           : (
-            <>
-              <Plot
-                data={currentFigure.data}
-                layout={currentFigure.layout}
-              />
-              {!figureUrl && !!keywords.length && (
-                <div className={`pt-2 pb-4 w-full flex justify-center items-center gap-4 ${styles.keywordsWrapper}`}>
-                  <Keywords keywords={keywords} />
-                </div>
-              )}
-            </>
+            <Plot
+              data={currentFigure.data}
+              layout={currentFigure.layout}
+            />
           )
       }
       </div>

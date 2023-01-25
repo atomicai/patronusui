@@ -89,7 +89,6 @@ export const View = () => {
                       <LazyFigures
                         key={itemIdx}
                         figure={'figure' in item ? item.figure : item}
-                        keywords={item.keywords || []}
                         lazyApi={item.lazy_figure_api || []}
                       />
                     ))}
