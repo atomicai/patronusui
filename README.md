@@ -19,7 +19,7 @@ P.S make sure you install it globally!
 
 > To build the production bundle you need to clone the repo, install the dependencies and finally produce the bundle.
 
-1. `git clone https://github.com/atomicai/patronumui.git && cd patronumui`
+1. `git clone https://github.com/atomicai/patronusui.git && cd patronusui`
 2. `yarn`
 3. `yarn build`
 
