@@ -95,7 +95,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                   layout={currentFigure.layout}
                 />
                 {topic && (
-                  <div className={`pt-2 pb-4 px-2 w-full flex flex-col justify-center items-center  text-white ${styles.topicWrapper}`}>
+                  <div className={`pt-2 pb-8 px-2 w-full flex flex-col justify-center items-center  text-white ${styles.topicWrapper}`}>
                     {isTopicLoading ? <Spinner /> : <SearchResult title={topic} found={docs} />}
                   </div>
                 )}

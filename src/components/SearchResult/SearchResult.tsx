@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Doc } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
-import { BriefDoc } from './BriefDoc';
+import { BriefDoc, StyleIndexes } from './BriefDoc';
 import { FavoriteDoc } from './FavoriteDoc';
 
 interface SearchResultProps {
@@ -65,9 +65,13 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
             found.length
               ? (
                 <div className="flex flex-wrap justify-center items-center">
-                  {list.map((item, idx) => (
-                    <BriefDoc key={idx} doc={item} onClick={() => setDetailedDoc(item)} onVote={(delta) => handleVote(item, delta)} />
-                  ))}
+                  {list.map((item, idx) => <BriefDoc
+                    key={idx}
+                    doc={item}
+                    onClick={() => setDetailedDoc(item)}
+                    onVote={(delta) => handleVote(item, delta)}
+                    styleIdx={(idx % 4) as StyleIndexes}
+                  />)}
                 </div>
               )
               : <div className="text-center my-8">Nothing is found</div>

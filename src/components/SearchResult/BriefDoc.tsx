@@ -1,28 +1,45 @@
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useState } from 'react';
 import { Doc } from '../../@types/search';
-import styles from './BriefDocProps.module.css';
+import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/24/outline';
+import styles from './BriefDoc.module.css';
+
+export type StyleIndexes =  0 | 1 | 2 | 3;
 
 interface BriefDocProps {
   doc: Doc;
   onClick: () => void;
   onVote: (delta: 1 | -1) => void;
+  styleIdx: StyleIndexes;
 }
 
-export const BriefDoc: FC<BriefDocProps> = ({ doc, onClick, onVote }) => {
+export const BriefDoc: FC<BriefDocProps> = ({ doc, onClick, onVote, styleIdx }) => {
+  const [isMouseOver, setIsMouseOver] = useState(false);
+
   const onUp = useCallback(() => onVote(1), [onVote]);
   const onDown = useCallback(() => onVote(-1), [onVote]);
 
   return (
-    <div className="flex flex-col items-start m-4 py-8 px-4 min-w-[14em] max-w-[17em]">
-      {doc.title && <h3 className="h3-element">{doc.title}</h3>}
+    <div
+      className={`${styles.wrapper} ${styles[`wrapperStyle${styleIdx}`]}`}
+      onMouseEnter={() => setIsMouseOver(true)}
+      onMouseLeave={() => setIsMouseOver(false)}
+    >
+      {doc.title && <h3>{doc.title}</h3>}
       <div className={styles.truncatedText} onClick={onClick}>
         {doc.text}
       </div>
-      <div className="mt-2">
-        <button onClick={onUp}>up</button>
-        <button onClick={onDown}>down</button>
+      <div className="my-2 h-8">
+        {isMouseOver && (
+          <>
+            <button className="mr-2" onClick={onUp}><HandThumbUpIcon className="w-8 h-8" /></button>
+            <button className="mr-2" onClick={onDown}><HandThumbDownIcon className="w-8 h-8" /></button>
+          </>
+        )}
       </div>
-      {doc.timestamp && <div className="mt-2">{doc.timestamp}</div>}
+      <div className="flex justify-between items-center w-full">
+        <div>{doc.timestamp}</div>
+        <div>{doc.score}</div>
+      </div>
     </div>
   );
 }
