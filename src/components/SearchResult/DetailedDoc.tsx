@@ -1,6 +1,6 @@
 import { FC, ReactNode, useMemo } from 'react';
-import { Tooltip } from '@mui/material'
 import { Doc } from '../../@types/search';
+import { Tooltip } from './Tooltip';
 import styles from './DetailedDoc.module.css';
 
 interface DetailedDocProps {
@@ -22,10 +22,10 @@ export const DetailedDoc: FC<DetailedDocProps> = ({ doc }) => {
     for (const part of doc.highlight) {
       highlightedText.push(doc.text.substring(idx, part.lo));
       highlightedText.push((
-        <Tooltip classes={{ tooltipArrow: styles.tooltip }} title={part.score} arrow>
-        <span>
-          {doc.text.substring(part.lo, part.hi + 1)}
-        </span>
+        <Tooltip key={idx} title={part.score}>
+          <span>
+            {doc.text.substring(part.lo, part.hi + 1)}
+          </span>
         </Tooltip>
       ))
       idx = part.hi + 1;
@@ -33,8 +33,6 @@ export const DetailedDoc: FC<DetailedDocProps> = ({ doc }) => {
     highlightedText.push(doc.text.substring(idx));
 
     return highlightedText;
-
-
   }, [doc]);
 
   return (
