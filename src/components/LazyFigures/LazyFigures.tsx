@@ -6,11 +6,12 @@ import { useAtom } from 'jotai';
 import { lazyPlots } from '../../contexts/UploadContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import styles from './LazyFigures.module.css';
-import { ChartBarSquareIcon } from '@heroicons/react/24/outline';
+import { Tooltip } from '@mui/material'
+import { ArchiveBoxXMarkIcon, ChartBarSquareIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import { SearchResult } from '../SearchResult';
 import { Data, Doc } from '../../@types/search';
+import styles from './LazyFigures.module.css';
 
 interface LazyFiguresProps {
   figure: PlotParams;
@@ -74,8 +75,6 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
         }
         setIsTopicLoading(false);
       }
-    } else {
-      setTopic('');
     }
   };
 
@@ -95,8 +94,15 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                   layout={currentFigure.layout}
                 />
                 {topic && (
-                  <div className={`pt-2 pb-8 px-2 w-full flex flex-col justify-center items-center  text-white ${styles.topicWrapper}`}>
-                    {isTopicLoading ? <Spinner /> : <SearchResult title={topic} found={docs} />}
+                  <div className="relative">
+                    <Tooltip title="Hide samples" arrow>
+                      <button className="absolute top-2 right-2 text-white hover:text-primary" onClick={() => setTopic('')}>
+                        <ArchiveBoxXMarkIcon className="w-8 h-8" />
+                      </button>
+                    </Tooltip>
+                    <div className={`pt-2 pb-8 px-2 w-full flex flex-col justify-center items-center  text-white ${styles.topicWrapper}`}>
+                      {isTopicLoading ? <Spinner /> : <SearchResult title={topic} found={docs} />}
+                    </div>
                   </div>
                 )}
               </>

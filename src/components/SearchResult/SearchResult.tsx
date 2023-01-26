@@ -5,7 +5,7 @@ import { Doc } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
 import { BriefDoc, StyleIndexes } from './BriefDoc';
 import { FavoriteDoc } from './FavoriteDoc';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface SearchResultProps {
   title?: string;
@@ -66,13 +66,15 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
             found.length
               ? (
                 <div className="flex flex-wrap justify-center items-center">
-                  {list.map((item, idx) => <BriefDoc
-                    key={idx}
-                    doc={item}
-                    onClick={() => setDetailedDoc(item)}
-                    onVote={(delta) => handleVote(item, delta)}
-                    styleIdx={(idx % 4) as StyleIndexes}
-                  />)}
+                  {list.map((item, idx) =>(
+                    <BriefDoc
+                      key={idx}
+                      doc={item}
+                      onClick={() => setDetailedDoc(item)}
+                      onVote={(delta) => handleVote(item, delta)}
+                      styleIdx={(idx % 4) as StyleIndexes}
+                    />
+                  ))}
                 </div>
               )
               : <div className="text-center my-8">Nothing is found</div>
@@ -84,16 +86,29 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
               ? (
                 <div>
                   <div className="text-right mb-1">
-                    <button onClick={() => setDetailedDoc(null)}><XMarkIcon className="w-8 h-8" /></button>
+                    <button className="hover:text-primary" onClick={() => setDetailedDoc(null)}>
+                      <XMarkIcon className="w-8 h-8" />
+                    </button>
                   </div>
                   <DetailedDoc doc={detailedDoc} />
                 </div>
               )
               : (
                 <div>
-                  {!!favorites.length && <button onClick={handleDownload}>download</button>}
+                  <div className="text-right mb-1">
+                    {!!favorites.length && (
+                      <button className="hover:text-primary" onClick={handleDownload}>
+                        <ArrowDownTrayIcon className="w-8 h-8" />
+                      </button>
+                    )}
+                  </div>
                   {favorites.map((doc, idx) => (
-                    <FavoriteDoc key={idx} doc={doc} onClick={() => setDetailedDoc(doc)} onVote={(delta) => handleVote(doc, delta)} />
+                    <FavoriteDoc
+                      key={idx}
+                      doc={doc}
+                      onClick={() => setDetailedDoc(doc)}
+                      onVote={(delta) => handleVote(doc, delta)}
+                    />
                   ))}
                 </div>
               )

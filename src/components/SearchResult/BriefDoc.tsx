@@ -31,8 +31,8 @@ export const BriefDoc: FC<BriefDocProps> = ({ doc, onClick, onVote, styleIdx }) 
       <div className="my-2 h-8">
         {isMouseOver && (
           <>
-            <button className="mr-2" onClick={onUp}><HandThumbUpIcon className="w-8 h-8" /></button>
-            <button className="mr-2" onClick={onDown}><HandThumbDownIcon className="w-8 h-8" /></button>
+            <button className="mr-2 hover:text-primary" onClick={onUp}><HandThumbUpIcon className="w-8 h-8" /></button>
+            <button className="hover:text-primary" onClick={onDown}><HandThumbDownIcon className="w-8 h-8" /></button>
           </>
         )}
       </div>
