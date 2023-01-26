@@ -5,6 +5,7 @@ import { Doc } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
 import { BriefDoc, StyleIndexes } from './BriefDoc';
 import { FavoriteDoc } from './FavoriteDoc';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface SearchResultProps {
   title?: string;
@@ -82,7 +83,9 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
             detailedDoc
               ? (
                 <div>
-                  <button onClick={() => setDetailedDoc(null)}>close</button>
+                  <div className="text-right mb-1">
+                    <button onClick={() => setDetailedDoc(null)}><XMarkIcon className="w-8 h-8" /></button>
+                  </div>
                   <DetailedDoc doc={detailedDoc} />
                 </div>
               )

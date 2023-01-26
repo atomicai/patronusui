@@ -1,6 +1,6 @@
-import { FC, useMemo } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
+import { Tooltip } from '@mui/material'
 import { Doc } from '../../@types/search';
-import { wrapTextParts } from '../../utils/text';
 import styles from './DetailedDoc.module.css';
 
 interface DetailedDocProps {
@@ -8,10 +8,40 @@ interface DetailedDocProps {
 }
 
 export const DetailedDoc: FC<DetailedDocProps> = ({ doc }) => {
-  const highlighted = useMemo(() => wrapTextParts(doc.text, doc.highlight), [doc]);
+  const highlightedText = useMemo(() => {
+    if (!doc.highlight?.length) {
+      return doc.text;
+    }
+
+    // it is suggested that:
+    //  - parts[i].lo <= parts[i].hi
+    //  - parts[i].hi < parts[i + 1].lo
+
+    const highlightedText: ReactNode[] = [];
+    let idx = 0;
+    for (const part of doc.highlight) {
+      highlightedText.push(doc.text.substring(idx, part.lo));
+      highlightedText.push((
+        <Tooltip classes={{ tooltipArrow: styles.tooltip }} title={part.score} arrow>
+        <span>
+          {doc.text.substring(part.lo, part.hi + 1)}
+        </span>
+        </Tooltip>
+      ))
+      idx = part.hi + 1;
+    }
+    highlightedText.push(doc.text.substring(idx));
+
+    return highlightedText;
+
+
+  }, [doc]);
+
   return (
     <div>
-      <div className={styles.highlightedText} dangerouslySetInnerHTML={{ __html: highlighted }} />
+      <div className={styles.highlightedText}>
+        {highlightedText}
+      </div>
     </div>
   )
 }
