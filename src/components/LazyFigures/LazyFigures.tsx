@@ -94,7 +94,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                   layout={currentFigure.layout}
                 />
                 {topic && (
-                  <div className="relative">
+                  <div className="relative w-full">
                     <Tooltip title="Hide samples" arrow>
                       <button className="absolute top-2 right-2 text-white hover:text-primary" onClick={() => setTopic('')}>
                         <ArchiveBoxXMarkIcon className="w-8 h-8" />
