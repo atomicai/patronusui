@@ -46,19 +46,15 @@ function SignIn() {
       })
   }
 
-  // if (isSignedIn) {
-  //   return <Navigate replace to="/iprofile" />
-  // }
-
   return (
     <section className={styles.section}>
-      <h1 className={styles.header}>Sign in to Patronum</h1>
+      <h1 className={styles.header}>Sign in to Patronus</h1>
 
       {!!message.length && <p className={styles.message}>{message}</p>}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
-          <p className={styles.labelContent}>Username</p>
+          <p className={styles.labelContent}>Email</p>
           <input type="text" ref={emailRef} className={styles.input} />
         </label>
 
