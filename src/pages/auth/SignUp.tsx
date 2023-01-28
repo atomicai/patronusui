@@ -2,6 +2,7 @@ import { FirebaseError } from 'firebase/app'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import Ownership from '../../components/Ownership/Ownership'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
 import styles from './components/styles/Sign.module.css'
@@ -48,7 +49,10 @@ function SignUp() {
 
   return (
     <section className={styles.section}>
-      <h1 className={styles.header}>Sign up for Patronus</h1>
+      <div className={styles.header}>
+        <h1>Sign up for Patronus</h1>
+        <Ownership />
+      </div>
 
       {!!message.length && <div className={styles.message}>{message}</div>}
 

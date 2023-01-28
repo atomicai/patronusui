@@ -4,10 +4,10 @@
 
 @layer components {
   .section {
-    @apply pt-10 flex flex-col justify-center items-center gap-10;
+    @apply pt-5 flex flex-col justify-center items-center gap-10;
   }
   .header {
-    @apply text-white text-2xl;
+    @apply flex flex-col justify-start items-center text-white text-2xl;
   }
   .message {
     @apply w-96 p-5 text-center text-xl text-white shadow-sm shadow-primary rounded-xl;
