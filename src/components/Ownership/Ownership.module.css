@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .div {
+    @apply flex items-center gap-1 text-lg text-white;
+  }
+  .img {
+    @apply w-12 h-12 hover:cursor-pointer;
+    filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%)
+      contrast(100%);
+  }
+}
