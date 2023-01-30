@@ -2,6 +2,7 @@ import { FirebaseError } from 'firebase/app'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import Ownership from '../../components/Ownership/Ownership'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
 import Message from './components/Message'
@@ -47,19 +48,18 @@ function SignIn() {
       })
   }
 
-  // if (isSignedIn) {
-  //   return <Navigate replace to="/iprofile" />
-  // }
-
   return (
     <section className={styles.section}>
-      <h1 className={styles.header}>Sign in to Patronum</h1>
+      <div className={styles.header}>
+        <h1>Sign in to Patronus</h1>
+        <Ownership />
+      </div>
 
       {!!messageContent.length && <Message content={messageContent} />}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
-          <p className={styles.labelContent}>Username</p>
+          <p className={styles.labelContent}>Email</p>
           <input type="text" ref={emailRef} className={styles.input} />
         </label>
 

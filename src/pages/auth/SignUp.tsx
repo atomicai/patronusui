@@ -1,17 +1,18 @@
 import { FirebaseError } from 'firebase/app'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import Ownership from '../../components/Ownership/Ownership'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
 import Message from './components/Message'
 import styles from './components/styles/Sign.module.css'
 
-const USERNAME_REGEX = /[A-z0-9]{4,20}$/
-const PASSWORD_REGEX = /[A-z0-9]{4,20}$/
-
 function SignUp() {
-  const [messageContent, setMessageContent] = useState<string>('')
+
+  const [message, setMessage] = useState<string>('')
+  const navigate = useNavigate()
+
 
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -19,14 +20,6 @@ function SignUp() {
   useEffect(() => {
     if (emailRef.current) emailRef.current.focus()
   }, [])
-
-  // useEffect(() => {
-  //   setIsValidUsername(USERNAME_REGEX.test(username))
-  // }, [username])
-
-  // useEffect(() => {
-  //   setIsValidPassword(PASSWORD_REGEX.test(password))
-  // }, [password])
 
   useEffect(() => {
     setMessageContent('')
@@ -41,44 +34,39 @@ function SignUp() {
     )
       return
 
-    if (!PASSWORD_REGEX.test(passwordRef.current?.value)) {
-      setMessageContent(
-        'Incorrect password. 4 to 20 characters. Letters and numbers allowed.'
-      )
-      return
-    }
-
-    /* Put auth job*/
     createUserWithEmailAndPassword(
       auth,
       emailRef.current.value,
       passwordRef.current.value
     )
       .then((userCredential) => {
-        // Signed in
+        // Signed up
         const user = userCredential.user
-        window.location.href = '/isearch'
+        navigate('/isearch')
         // ...
       })
       .catch((error: FirebaseError) => {
-        setMessageContent(error.message)
-        // ..
+
+        setMessage(error.message)
+
       })
   }
 
-  // if (isSignedUp) {
-  //   return <Navigate replace to="/isignin" />
-  // }
-
   return (
     <section className={styles.section}>
-      <h1 className={styles.header}>Sign up for Patronum</h1>
-      
-      {!!messageContent.length && <Message content={messageContent} />}
-      
+
+      <div className={styles.header}>
+        <h1>Sign up for Patronus</h1>
+        <Ownership />
+      </div>
+
+      {!!message.length && <div className={styles.message}>{message}</div>}
+
+
+   
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
-          <p className={styles.labelContent}>Username</p>
+          <p className={styles.labelContent}>Email</p>
           <input type="text" ref={emailRef} className={styles.input} />
         </label>
 
@@ -101,6 +89,7 @@ function SignUp() {
           <span>Sign in</span>
         </NavLink>
       </p>
+
       <GoogleIcon />
     </section>
   )
