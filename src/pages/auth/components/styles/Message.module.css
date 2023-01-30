@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .message {
+    @apply w-96 p-5 text-center text-xl text-white shadow-sm shadow-primary rounded-xl;
+  }
+}
