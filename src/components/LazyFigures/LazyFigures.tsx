@@ -68,7 +68,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
         setTopic(clickedTopic);
         setIsTopicLoading(true);
         try {
-          const { data } = await axios.post<Data>('/viewing_representation', { topic_name: topic });
+          const { data } = await axios.post<Data>('/viewing_representation', { topic_name: clickedTopic });
           setDocs(data.docs);
         } catch (e) {
           toast.error((e as Error).message);
