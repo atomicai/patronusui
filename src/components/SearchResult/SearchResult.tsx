@@ -5,21 +5,32 @@ import { Doc } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
 import { BriefDoc, StyleIndexes } from './BriefDoc';
 import { FavoriteDoc } from './FavoriteDoc';
-import { ArrowDownTrayIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Tooltip } from '@mui/material';
 
 interface SearchResultProps {
   title?: string;
   found: Doc[];
 }
 export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
+  const [pageSize] = useState(6);
+  const [page, setPage] = useState(0);
+  const [maxPage, setMaxPage] = useState(0);
   const [list, setList] = useState<Doc[]>([]);
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
 
   useEffect(() => {
-    setList([...found]);
+    setPage(0);
+    setMaxPage(Math.ceil(found.length / pageSize) - 1);
+    setList([...found.slice(0, pageSize)]);
     setFavorites([]);
-  }, [found]);
+  }, [found, pageSize]);
+
+  useEffect(() => {
+    const offset = pageSize * page;
+    setList([...found.slice(offset, offset + pageSize)]);
+  }, [page, pageSize, found]);
 
   const handleVote = (docToHandle: Doc, delta: 1 | -1) => {
     if (delta > 0) {
@@ -61,7 +72,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
     <div className="w-full h-full">
       {title && <div className="text-lg font-bold text-center mb-4">{title}</div>}
       <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
+        <div className="col-span-2 pt-4 pb-8 relative">
           {
             found.length
               ? (
@@ -79,6 +90,13 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
               )
               : <div className="text-center my-8">Nothing is found</div>
           }
+          {(page < maxPage) && (
+            <Tooltip title="Next samples" arrow>
+              <button className="hover:text-primary absolute right-2 bottom-0" onClick={() => setPage(prev => prev + 1)}>
+                <ChevronRightIcon className="w-8 h-8" />
+              </button>
+            </Tooltip>
+          )}
         </div>
         <div className="border-[#A456F0] border-l p-4 pl-8">
           {
