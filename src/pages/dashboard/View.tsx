@@ -8,7 +8,7 @@ import {
 import { Link, Tooltip } from '@mui/material'
 
 import { useAtom, useSetAtom } from 'jotai'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import axios from 'axios'
 
@@ -52,6 +52,8 @@ export const View = () => {
     setSliderIndex((prevIndex) => prevIndex - 1)
   }
 
+  const severalPages = useMemo(() => viewPayloadAtom.length > 1, [viewPayloadAtom]);
+
   return (
     <div className="w-full h-full flex justify-end items-center py-4">
       <nav className="h-1/3 w-[4%]  border-[#A456F0] border-r flex flex-col items-center justify-evenly">
@@ -71,7 +73,7 @@ export const View = () => {
       </nav>
       <section className="h-full w-[92%]">
         <>
-          <div className="w-full h-[95%] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto">
+          <div className={`w-full ${severalPages ? 'h-[95%]' : 'h-full'} scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto`}>
             {plotsAtom.map(
               (
                 figures: PlotParams | (PlotPayload | PlotParams)[],
@@ -96,32 +98,34 @@ export const View = () => {
                 ) : null
             )}
           </div>
-          <div className="w-full h-[5%] pt-2 inline-flex justify-center">
-            <ChevronDoubleLeftIcon
-              color={sliderIndex !== 0 ? 'white' : 'gray'}
-              height={20}
-              width={20}
-              className={`mr-2  ${
-                sliderIndex !== 0 && 'hover:scale-125 hover:cursor-pointer'
-              }`}
-              onClick={() => sliderIndex !== 0 && handleLeftArrow()}
-            />
-            <ChevronDoubleRightIcon
-              color={
-                viewPayloadAtom.length - 1 !== sliderIndex ? 'white' : 'gray'
-              }
-              height={20}
-              width={20}
-              className={` ${
-                viewPayloadAtom.length - 1 !== sliderIndex &&
-                'hover:scale-125 hover:cursor-pointer'
-              }`}
-              onClick={() =>
-                viewPayloadAtom.length - 1 !== sliderIndex &&
-                handleRightArrow(sliderIndex)
-              }
-            />
-          </div>
+          { severalPages && (
+            <div className="w-full h-[5%] pt-2 inline-flex justify-center">
+              <ChevronDoubleLeftIcon
+                color={sliderIndex !== 0 ? 'white' : 'gray'}
+                height={20}
+                width={20}
+                className={`mr-2  ${
+                  sliderIndex !== 0 && 'hover:scale-125 hover:cursor-pointer'
+                }`}
+                onClick={() => sliderIndex !== 0 && handleLeftArrow()}
+              />
+              <ChevronDoubleRightIcon
+                color={
+                  viewPayloadAtom.length - 1 !== sliderIndex ? 'white' : 'gray'
+                }
+                height={20}
+                width={20}
+                className={` ${
+                  viewPayloadAtom.length - 1 !== sliderIndex &&
+                  'hover:scale-125 hover:cursor-pointer'
+                }`}
+                onClick={() =>
+                  viewPayloadAtom.length - 1 !== sliderIndex &&
+                  handleRightArrow(sliderIndex)
+                }
+              />
+            </div>
+          )}
         </>
       </section>
       <nav className="h-1/3 w-[4%]  border-[#A456F0] border-l flex flex-col items-center justify-evenly">
