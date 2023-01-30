@@ -1,0 +1,12 @@
+/* "!important" modifier is significant for production */
+
+.tooltip {
+    background-color: darkcyan !important;
+    border-radius: 0.75em !important;
+    font-weight: bold !important;
+    padding: 0.5em 1em !important;
+}
+
+.arrow {
+    color: darkcyan !important;
+}

@@ -71,7 +71,7 @@ export const View = () => {
       </nav>
       <section className="h-full w-[92%]">
         <>
-          <div className="w-full h-[95%] overflow-auto">
+          <div className="w-full h-[95%] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto">
             {plotsAtom.map(
               (
                 figures: PlotParams | (PlotPayload | PlotParams)[],
@@ -80,7 +80,7 @@ export const View = () => {
                 index === sliderIndex ? (
                   <div
                     key={index}
-                    className="w-full flex flex-col justify-center items-center"
+                    className="w-full flex flex-col justify-center"
                   >
                     {(Array.isArray(figures)
                       ? (figures as PlotPayload[])
@@ -89,7 +89,6 @@ export const View = () => {
                       <LazyFigures
                         key={itemIdx}
                         figure={'figure' in item ? item.figure : item}
-                        keywords={item.keywords || []}
                         lazyApi={item.lazy_figure_api || []}
                       />
                     ))}

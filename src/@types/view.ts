@@ -40,6 +40,5 @@ export interface LazyFigureApi {
 
 export interface PlotPayload {
   figure: PlotParams;
-  keywords?: KeywordsData[];
   lazy_figure_api?: LazyFigureApi[];
 }
