@@ -5,14 +5,11 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import Ownership from '../../components/Ownership/Ownership'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
-import Message from './components/Message'
 import styles from './components/styles/Sign.module.css'
 
 function SignUp() {
-
   const [message, setMessage] = useState<string>('')
   const navigate = useNavigate()
-
 
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -22,7 +19,7 @@ function SignUp() {
   }, [])
 
   useEffect(() => {
-    setMessageContent('')
+    setMessage('')
   }, [emailRef.current?.value, passwordRef.current?.value])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,15 +43,12 @@ function SignUp() {
         // ...
       })
       .catch((error: FirebaseError) => {
-
         setMessage(error.message)
-
       })
   }
 
   return (
     <section className={styles.section}>
-
       <div className={styles.header}>
         <h1>Sign up for Patronus</h1>
         <Ownership />
@@ -62,8 +56,6 @@ function SignUp() {
 
       {!!message.length && <div className={styles.message}>{message}</div>}
 
-
-   
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
           <p className={styles.labelContent}>Email</p>
