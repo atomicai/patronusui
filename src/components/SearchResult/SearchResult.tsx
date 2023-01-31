@@ -72,7 +72,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
     <div className="w-full h-full">
       {title && <div className="text-lg font-bold text-center mb-4">{title}</div>}
       <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 pt-4 pb-8 relative">
+        <div className="col-span-2 pt-8 pb-4 relative">
           {
             found.length
               ? (
@@ -92,7 +92,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
           }
           {(page < maxPage) && (
             <Tooltip title="Next samples" arrow>
-              <button className="hover:text-primary absolute right-2 bottom-0" onClick={() => setPage(prev => prev + 1)}>
+              <button className="hover:text-primary absolute right-2 top-0" onClick={() => setPage(prev => prev + 1)}>
                 <ChevronRightIcon className="w-8 h-8" />
               </button>
             </Tooltip>
