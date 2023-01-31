@@ -1,5 +1,6 @@
 export type Data = {
   docs: Doc[]
+  title?: string;
 }
 
 export type Query = {
