@@ -1,3 +1,17 @@
-.highlightedText span {
+.highlighted {
     background-color: darkcyan;
+    display: inline-block;
+}
+.cue {
+    margin-bottom: 0.5em;
+}
+.operator {
+    border-bottom: 1px dotted lightseagreen;
+    font-style: italic;
+    /*color: lightseagreen;*/
+}
+.client {
+    border-bottom: 1px dotted darksalmon;
+    font-style: italic;
+    /*color: orange;*/
 }
