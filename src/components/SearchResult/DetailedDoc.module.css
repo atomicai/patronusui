@@ -5,13 +5,18 @@
 .cue {
     margin-bottom: 0.5em;
 }
-.operator {
+.actor0 {
+    border-bottom: 1px dotted darksalmon;
+    font-style: italic;
+    /*color: orange;*/
+}
+.actor1 {
     border-bottom: 1px dotted lightseagreen;
     font-style: italic;
     /*color: lightseagreen;*/
 }
-.client {
-    border-bottom: 1px dotted darksalmon;
+.actor2 {
+    border-bottom: 1px dotted lightcyan;
     font-style: italic;
-    /*color: orange;*/
+    /*color: cyan;*/
 }

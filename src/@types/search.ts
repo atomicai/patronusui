@@ -24,6 +24,7 @@ export type Doc = {
   timestamp?: string
   upvote?: number
   highlight?: DocPart[];
+  colorify?: string[];
 }
 
 export type DataFromServer = {
