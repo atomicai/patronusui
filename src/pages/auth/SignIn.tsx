@@ -2,10 +2,10 @@ import { FirebaseError } from 'firebase/app'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import FBMessage from '../../components/FBMessage/FBMessage'
 import Ownership from '../../components/Ownership/Ownership'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
-import Message from './components/Message'
 import styles from './components/styles/Sign.module.css'
 
 function SignIn() {
@@ -55,7 +55,7 @@ function SignIn() {
         <Ownership />
       </div>
 
-      {!!messageContent.length && <Message content={messageContent} />}
+      {!!messageContent.length && <FBMessage content={messageContent} />}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>

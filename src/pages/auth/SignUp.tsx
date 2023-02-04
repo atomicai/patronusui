@@ -2,13 +2,14 @@ import { FirebaseError } from 'firebase/app'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import FBMessage from '../../components/FBMessage/FBMessage'
 import Ownership from '../../components/Ownership/Ownership'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
 import styles from './components/styles/Sign.module.css'
 
 function SignUp() {
-  const [message, setMessage] = useState<string>('')
+  const [messageContent, setMessageContent] = useState<string>('')
   const navigate = useNavigate()
 
   const emailRef = useRef<HTMLInputElement>(null)
@@ -19,7 +20,7 @@ function SignUp() {
   }, [])
 
   useEffect(() => {
-    setMessage('')
+    setMessageContent('')
   }, [emailRef.current?.value, passwordRef.current?.value])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,7 +44,7 @@ function SignUp() {
         // ...
       })
       .catch((error: FirebaseError) => {
-        setMessage(error.message)
+        setMessageContent(error.message)
       })
   }
 
@@ -54,7 +55,7 @@ function SignUp() {
         <Ownership />
       </div>
 
-      {!!message.length && <div className={styles.message}>{message}</div>}
+      {!!messageContent.length && <FBMessage content={messageContent} />}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>

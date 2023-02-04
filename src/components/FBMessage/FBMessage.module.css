@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-  .message {
+  .content {
     @apply w-96 p-5 text-center text-xl text-white shadow-sm shadow-primary rounded-xl;
   }
 }
