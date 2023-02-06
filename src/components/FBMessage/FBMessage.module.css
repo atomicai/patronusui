@@ -4,6 +4,6 @@
 
 @layer components {
   .content {
-    @apply w-96 p-5 text-center text-xl text-white shadow-sm shadow-primary rounded-xl;
+    @apply w-96 p-5 flex flex-col items-center justify-center text-xl text-white shadow-sm shadow-primary rounded-xl;
   }
 }

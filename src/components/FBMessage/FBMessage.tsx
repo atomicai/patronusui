@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid'
 import { FC, useEffect, useState } from 'react'
 import styles from './FBMessage.module.css'
 
@@ -29,9 +30,13 @@ const FBMessage: FC<FBMessageProps> = ({ errorCode }) => {
         setContent('Something went wrong. We are working on it')
         break
     }
-  }, [])
+  }, [errorCode])
 
-  return <div className={styles.content}>{content}</div>
+  const contentElements = content.split('.').map((sentence) => {
+    return <span key={nanoid()}>{sentence.trim()}</span>
+  })
+
+  return <div className={styles.content}>{contentElements}</div>
 }
 
 export default FBMessage
