@@ -13,11 +13,11 @@ export type Passage = {
 
 export enum DocPartColor {
   highlighted = 'highlighted',
-  color1 = 'color1',
-  color2 = 'color2',
-  color3 = 'color3',
-  color4 = 'color4',
-  color5 = 'color4',
+  color1 = 1,
+  color2 = 2,
+  color3 = 3,
+  color4 = 4,
+  color5 = 5,
 }
 
 export type DocPart = {
