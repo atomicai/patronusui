@@ -9,7 +9,7 @@ import GoogleIcon from './components/GoogleIcon'
 import styles from './components/styles/Sign.module.css'
 
 function SignUp() {
-  const [messageContent, setMessageContent] = useState<string>('')
+  const [errorCode, setErrorCode] = useState<string>('')
   const navigate = useNavigate()
 
   const emailRef = useRef<HTMLInputElement>(null)
@@ -20,7 +20,7 @@ function SignUp() {
   }, [])
 
   useEffect(() => {
-    setMessageContent('')
+    setErrorCode('')
   }, [emailRef.current?.value, passwordRef.current?.value])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,7 +44,7 @@ function SignUp() {
         // ...
       })
       .catch((error: FirebaseError) => {
-        setMessageContent(error.message)
+        setErrorCode(error.code)
       })
   }
 
@@ -55,7 +55,7 @@ function SignUp() {
         <Ownership />
       </div>
 
-      {!!messageContent.length && <FBMessage content={messageContent} />}
+      {!!errorCode.length && <FBMessage errorCode={errorCode} />}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
