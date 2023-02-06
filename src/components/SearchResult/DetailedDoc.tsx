@@ -28,7 +28,7 @@ const highlightText = (doc: Doc) => {
     highlightedText.push(breakLines(doc.text.substring(idx, part.lo)));
     highlightedText.push((
       <Tooltip key={idx} title={part.score}>
-          <span className={styles[`color${part.color}` || DocPartColor.highlighted]}>
+          <span className={styles[part.color ? `color${part.color}` : DocPartColor.highlighted]}>
             {doc.text.substring(part.lo, part.hi + 1)}
           </span>
       </Tooltip>
