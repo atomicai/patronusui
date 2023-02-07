@@ -26,6 +26,9 @@ const FBMessage: FC<FBMessageProps> = ({ errorCode }) => {
       case 'auth/weak-password':
         setContent('Week password. Try again')
         break
+      case 'auth/too-many-requests':
+        setContent('Too many requests. Try later')
+        break
       default:
         setContent('Something went wrong. We are working on it')
         break
