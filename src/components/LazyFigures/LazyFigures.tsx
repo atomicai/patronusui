@@ -24,6 +24,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
   const [ topic, setTopic ] = useState('');
   const [ isTopicLoading, setIsTopicLoading ] = useState(false);
   const [ docs, setDocs ] = useState<Doc[]>([]);
+  const [ docsTitle, setDocsTitle ] = useState('');
 
   useEffect(() => {
     setFigureUrl('');
@@ -73,6 +74,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
             api: figureUrl || 'default',
           });
           setDocs(data.docs);
+          setDocsTitle(data.title || '');
         } catch (e) {
           toast.error((e as Error).message);
         }
@@ -104,7 +106,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                       </button>
                     </Tooltip>
                     <div className={`pt-2 pb-8 px-2 w-full flex flex-col justify-center items-center  text-white ${styles.topicWrapper}`}>
-                      {isTopicLoading ? <Spinner /> : <SearchResult title={topic} found={docs} />}
+                      {isTopicLoading ? <Spinner /> : <SearchResult title={docsTitle || topic} found={docs} />}
                     </div>
                   </div>
                 )}
