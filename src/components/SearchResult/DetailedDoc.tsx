@@ -21,7 +21,7 @@ const highlightText = (doc: Doc) => {
 
   // it is suggested that:
   //  - there is no '\n' between lo and hi indexes
-  //  - parts[i].lo <= parts[i].hi
+  //  - parts[i].lo < parts[i].hi
   //  - parts[i].hi < parts[i + 1].lo
   let idx = 0;
   for (const part of (doc.highlight || [])) {
@@ -29,7 +29,7 @@ const highlightText = (doc: Doc) => {
     highlightedText.push((
       <Tooltip key={idx} title={part.score}>
           <span className={styles[part.color ? `color${part.color}` : DocPartColor.highlighted]}>
-            {doc.text.substring(part.lo, part.hi + 1)}
+            {doc.text.substring(part.lo, part.hi)}
           </span>
       </Tooltip>
     ))

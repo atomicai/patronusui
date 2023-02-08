@@ -2,27 +2,27 @@
     background-color: darkcyan;
 }
 .color1 {
-    border-bottom: 1px dotted darksalmon;
-    font-style: italic;
+    border-bottom: 1px solid darksalmon;
+    /*font-style: italic;*/
     /*color: orange;*/
 }
 .color2 {
-    border-bottom: 1px dotted lightseagreen;
-    font-style: italic;
+    border-bottom: 1px solid lightseagreen;
+    /*font-style: italic;*/
     /*color: lightseagreen;*/
 }
 .color3 {
-    border-bottom: 1px dotted lightcyan;
-    font-style: italic;
+    border-bottom: 1px solid lightcyan;
+    /*font-style: italic;*/
     /*color: cyan;*/
 }
 .color4 {
-    border-bottom: 1px dotted yellow;
-    font-style: italic;
+    border-bottom: 1px solid yellow;
+    /*font-style: italic;*/
 }
 .color5 {
-    border-bottom: 1px dotted lightgreen;
-    font-style: italic;
+    border-bottom: 1px solid lightgreen;
+    /*font-style: italic;*/
 }
 .newLine {
     margin-bottom: 0.5em;
