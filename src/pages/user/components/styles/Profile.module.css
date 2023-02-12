@@ -19,10 +19,13 @@
     @apply h-8 w-8 mr-2 text-primary cursor-pointer hover:text-white;
   }
   .iconUser {
-    @apply h-8 w-8 text-white;
+    @apply h-12 w-12;
   }
   .section {
     @apply flex items-center justify-center w-full h-full;
+  }
+  .info {
+    @apply w-1/6 h-1/6 flex flex-col items-center justify-evenly;
   }
   .p {
     @apply text-lg text-white;
