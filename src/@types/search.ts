@@ -29,11 +29,14 @@ export type DocPart = {
 
 export type Doc = {
   title?: string
+  label?: string
   text: string
-  score: string
+  score?: string
+  doc_score?: string
   timestamp?: string
   upvote?: number
   highlight?: DocPart[];
+  highlight_idx?: number;
 }
 
 export type DataFromServer = {

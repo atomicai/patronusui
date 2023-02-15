@@ -1,0 +1,74 @@
+.wrapper {
+    margin: 0 2em 3em 1em;
+    padding: 1em;
+    position: relative;
+    font-family: 'helvetica', san-serif;
+    background: #12071f;
+    border: 1px solid #252727;
+}
+.wrapper:before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    z-index: -1;
+    background: #fff;
+    transform: skew(0.5deg, 0.5deg);
+    /*transform: scaleY(1.025) skew(0.5deg, 0.5deg);*/
+}
+
+.wrapperStyle0:before {
+    background: #f2709c;
+    background: -webkit-linear-gradient(to right, #ff9472, #f2709c);
+    background: linear-gradient(to right, #ff9472, #f2709c);
+}
+.wrapperStyle1:before {
+    background: #c21500;
+    background: -webkit-linear-gradient(to right, #ffc500, #c21500);
+    background: linear-gradient(to right, #ffc500, #c21500);
+}
+.wrapperStyle2:before {
+    background: #fc354c;
+    background: -webkit-linear-gradient(to right, #0abfbc, #fc354c);
+    background: linear-gradient(to right, #0abfbc, #fc354c);
+}
+.wrapperStyle3:before {
+    background: #c9ffbf;
+    background: -webkit-linear-gradient(to right, #ffafbd, #c9ffbf);
+    background: linear-gradient(to right, #ffafbd, #c9ffbf);
+}
+
+.header {
+    font-family: GothamMedium;
+    font-size: 1.25em;
+}
+
+.vs {
+    font-family: Cyberpunk;
+    position: relative;
+    padding: 0 0.5em;
+    top: -0.25em;
+}
+
+.vsColor {
+    color: cyan;
+}
+
+.highlighted {
+    background-color: darkcyan;
+}
+
+.truncatedText {
+    margin: 1em 0;
+}
+.truncatedText:hover {
+    cursor: pointer;
+}
+.truncatedText:before {
+    content: '... ';
+}
+.truncatedText:after {
+    content: ' ...';
+}

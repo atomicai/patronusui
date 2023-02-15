@@ -1,18 +1,18 @@
 import { FC, useCallback, useState } from 'react';
 import { Doc } from '../../@types/search';
 import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/24/outline';
-import styles from './BriefDoc.module.css';
+import styles from './TileDoc.module.css';
 
-export type StyleIndexes =  0 | 1 | 2 | 3;
+export type TileStyleIndexes =  0 | 1 | 2 | 3;
 
-interface BriefDocProps {
+interface TileDocProps {
   doc: Doc;
   onClick: () => void;
   onVote: (delta: 1 | -1) => void;
-  styleIdx: StyleIndexes;
+  styleIdx: TileStyleIndexes;
 }
 
-export const BriefDoc: FC<BriefDocProps> = ({ doc, onClick, onVote, styleIdx }) => {
+export const TileDoc: FC<TileDocProps> = ({ doc, onClick, onVote, styleIdx }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const onUp = useCallback(() => onVote(1), [onVote]);
@@ -38,7 +38,7 @@ export const BriefDoc: FC<BriefDocProps> = ({ doc, onClick, onVote, styleIdx }) 
       </div>
       <div className="flex justify-between items-center w-full">
         <div>{doc.timestamp}</div>
-        <div>{doc.score}</div>
+        <div>{doc.doc_score || doc.score}</div>
       </div>
     </div>
   );

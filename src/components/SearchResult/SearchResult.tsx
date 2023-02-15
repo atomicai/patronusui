@@ -1,18 +1,22 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Doc } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
-import { BriefDoc, StyleIndexes } from './BriefDoc';
+import { TileDoc, TileStyleIndexes } from './TileDoc';
 import { FavoriteDoc } from './FavoriteDoc';
 import { ArrowDownTrayIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from '@mui/material';
+import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
+import Modal from '@mui/material/Modal';
+import styles from './SearchResult.module.css';
 
 interface SearchResultProps {
   title?: string;
   found: Doc[];
+  variant?: 'tiles' | 'snippets';
 }
-export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
+export const SearchResult: FC<SearchResultProps> = ({ title, found, variant = 'snippets' }) => {
   const [pageSize] = useState(6);
   const [page, setPage] = useState(0);
   const [maxPage, setMaxPage] = useState(0);
@@ -23,16 +27,24 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
   useEffect(() => {
     setPage(0);
     setMaxPage(Math.ceil(found.length / pageSize) - 1);
-    setList([...found.slice(0, pageSize)]);
     setFavorites([]);
-  }, [found, pageSize]);
+    if (variant === 'tiles') {
+      setList([...found.slice(0, pageSize)]);
+    } else if (variant === 'snippets') {
+      setList([...found]);
+    }
+  }, [found, pageSize, variant]);
 
   useEffect(() => {
-    const offset = pageSize * page;
-    setList([...found.slice(offset, offset + pageSize)]);
-  }, [page, pageSize, found]);
+    if (variant === 'tiles') {
+      const offset = pageSize * page;
+      setList([...found.slice(offset, offset + pageSize)]);
+    } else if (variant === 'snippets') {
+      setList([...found]);
+    }
+  }, [page, pageSize, found, variant]);
 
-  const handleVote = (docToHandle: Doc, delta: 1 | -1) => {
+  const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
     if (delta > 0) {
       if (list.includes(docToHandle)) {
         setList((prev) => prev.filter(item => item !== docToHandle));
@@ -55,9 +67,9 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
         setList(prev => prev.filter((doc) => doc !== docToHandle));
       }
     }
-  };
+  }, [list, setList, favorites, setFavorites]);
 
-  const handleDownload = async () => {
+  const handleDownload = useCallback(async () => {
     try {
       const filename = await axios
         .post<{ filename: string }>('/snapshotting', { docs: favorites })
@@ -66,7 +78,9 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
     } catch (e) {
       toast.error((e as Error).message);
     }
-  };
+  }, [favorites]);
+
+  const handleDetailedClose = useCallback(() => setDetailedDoc(null), [setDetailedDoc]);
 
   return (
     <div className="w-full h-full">
@@ -76,35 +90,54 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
           {
             found.length
               ? (
-                <div className="flex flex-wrap justify-center items-center">
-                  {list.map((item, idx) =>(
-                    <BriefDoc
-                      key={idx}
-                      doc={item}
-                      onClick={() => setDetailedDoc(item)}
-                      onVote={(delta) => handleVote(item, delta)}
-                      styleIdx={(idx % 4) as StyleIndexes}
-                    />
-                  ))}
-                </div>
+                <>
+                  {(variant === 'tiles') && (
+                    <>
+                      <div className="flex flex-wrap justify-center items-center">
+                        {list.map((item, idx) =>(
+                          <TileDoc
+                            key={idx}
+                            doc={item}
+                            onClick={() => setDetailedDoc(item)}
+                            onVote={(delta) => handleVote(item, delta)}
+                            styleIdx={(idx % 4) as TileStyleIndexes}
+                          />
+                        ))}
+                      </div>
+                      {(page < maxPage) && (
+                        <Tooltip title="Next samples" arrow>
+                          <button className="hover:text-primary absolute right-2 top-0" onClick={() => setPage(prev => prev + 1)}>
+                            <ChevronRightIcon className="w-8 h-8" />
+                          </button>
+                        </Tooltip>
+                      )}
+                    </>
+                  )}
+                  {(variant === 'snippets') && (
+                    <div className="h-[80vh] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto">
+                      {list.map((item, idx) => (
+                        <SnippetDoc
+                          key={idx}
+                          doc={item}
+                          onClick={() => setDetailedDoc(item)}
+                          onVote={(delta) => handleVote(item, delta)}
+                          styleIdx={(idx % 4) as SnippetStyleIndexes}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
               )
               : <div className="text-center my-8">Nothing is found</div>
           }
-          {(page < maxPage) && (
-            <Tooltip title="Next samples" arrow>
-              <button className="hover:text-primary absolute right-2 top-0" onClick={() => setPage(prev => prev + 1)}>
-                <ChevronRightIcon className="w-8 h-8" />
-              </button>
-            </Tooltip>
-          )}
         </div>
         <div className="border-[#A456F0] border-l p-4 pl-8">
           {
-            detailedDoc
+            (detailedDoc && (variant === 'tiles'))
               ? (
                 <div>
                   <div className="text-right mb-1">
-                    <button className="hover:text-primary" onClick={() => setDetailedDoc(null)}>
+                    <button className="hover:text-primary" onClick={handleDetailedClose}>
                       <XMarkIcon className="w-8 h-8" />
                     </button>
                   </div>
@@ -133,6 +166,19 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
           }
         </div>
       </div>
+      <Modal open={!!detailedDoc && (variant === 'snippets')} onClose={handleDetailedClose}>
+        <div className={styles.modal}>
+          <div className="h-[15%] text-right mb-1">
+            <button className="hover:text-primary" onClick={handleDetailedClose}>
+              <XMarkIcon className="w-8 h-8" />
+            </button>
+          </div>
+          {/*<div className="overflow-auto">*/}
+          <div className="h-[85%] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto">
+            {detailedDoc && <DetailedDoc doc={detailedDoc} />}
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 };
