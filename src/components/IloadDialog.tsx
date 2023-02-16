@@ -6,15 +6,17 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import { toast } from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
 import { ColumnCandidates } from '../@types/view';
 
-type Response = {
-  is_text_column_ok: boolean
-  is_date_column_ok: boolean
+interface SuccessLoadingResponse {
+  success: string;
 }
+interface ErrorLoadingResponse {
+  error: string;
+}
+type LoadingResponse = SuccessLoadingResponse | ErrorLoadingResponse;
 
 interface Props {
   open: boolean
@@ -32,7 +34,6 @@ export default function IloadDialog({ open, setOpen, handleViewing, columnCandid
   const [emailValue, setEmailValue] = useState<string>('')
   const [checkedResults, setCheckedResults] = useState(false)
   const [checkedSubscription, setCheckedSubscription] = useState(false)
-  const navigate = useNavigate()
 
   useEffect(() => {
     setTextValue('');
@@ -40,33 +41,21 @@ export default function IloadDialog({ open, setOpen, handleViewing, columnCandid
   }, [columnCandidates]);
 
   const handleIloading = async () => {
-    const response: AxiosResponse<Response> = await axios.post('/iloading', {
-      email: emailValue === '' ? null : emailValue,
-      text: textValue,
-      datetime: dateValue,
-    })
-
-    if (response.data.is_date_column_ok && response.data.is_text_column_ok) {
-      handleClose()
-      toast.success('Roger that, indexing in progress...')
-      // setProcessing(true)
-      handleViewing()
-    }
-
-    if (!response.data.is_date_column_ok && response.data.is_text_column_ok) {
-      handleClose()
-      toast.success(
-        'Roger that, datetime column is no specified using default ordering'
-      )
-      // setProcessing(true)
-      handleViewing()
-    }
-
-    if (!response.data.is_text_column_ok) {
-      toast.error('Sorry, but the textual column name does not match')
-      handleClose()
-      // setLoading(false)
-      navigate('/searching')
+    try {
+      const response = await axios.post<LoadingResponse>('/iloading', {
+        email: emailValue === '' ? null : emailValue,
+        text: textValue,
+        datetime: dateValue,
+      }).then(({ data }) => data);
+      const errorMessage = (response as ErrorLoadingResponse).error;
+      if (errorMessage) {
+        throw new Error(errorMessage);
+      }
+      toast.success((response as SuccessLoadingResponse).success || 'Roger that, indexing in progress...');
+      handleClose();
+      handleViewing();
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 
