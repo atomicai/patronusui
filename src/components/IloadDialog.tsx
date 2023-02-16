@@ -25,26 +25,25 @@ interface Props {
 
 const labelStyle = { display: 'inline-block', width: '10em', marginRight: '0.5em' };
 const autocompleteStyle = { width: '15em' };
-const takeFirst = (values: string[] | undefined, defaultValue: string) => values?.length ? values[0] : defaultValue;
 
 export default function IloadDialog({ open, setOpen, handleViewing, columnCandidates }: Props) {
-  const [textValue, setTextValue] = useState(takeFirst(columnCandidates.text, 'text'));
-  const [dateValue, setDateValue] = useState(takeFirst(columnCandidates.datetime, 'datetime'));
+  const [textValue, setTextValue] = useState('');
+  const [dateValue, setDateValue] = useState('');
   const [emailValue, setEmailValue] = useState<string>('')
   const [checkedResults, setCheckedResults] = useState(false)
   const [checkedSubscription, setCheckedSubscription] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
-    setTextValue(takeFirst(columnCandidates.text, 'text'));
-    setDateValue(takeFirst(columnCandidates.datetime, 'datetime'));
+    setTextValue('');
+    setDateValue('');
   }, [columnCandidates]);
 
   const handleIloading = async () => {
     const response: AxiosResponse<Response> = await axios.post('/iloading', {
       email: emailValue === '' ? null : emailValue,
-      text: textValue === '' ? 'text' : textValue,
-      datetime: dateValue === '' ? 'datetime' : dateValue
+      text: textValue,
+      datetime: dateValue,
     })
 
     if (response.data.is_date_column_ok && response.data.is_text_column_ok) {
