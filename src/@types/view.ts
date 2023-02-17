@@ -11,7 +11,11 @@ export interface UploadPayload {
   is_suffix_ok: boolean
   is_file_corrupted: boolean
   is_prompt_required: boolean
+  text_columns?: string[];
+  datetime_columns?: string[];
 }
+
+export type ColumnCandidates = Record<string, string[]>;
 
 export interface File {
   name: string
