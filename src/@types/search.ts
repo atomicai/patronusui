@@ -40,3 +40,13 @@ export type DataFromServer = {
   query: Query
   passage: Passage
 }
+
+export interface TimestampedValue {
+  timestamp: string;
+  value: number;
+}
+
+export interface KeywordDistributionData {
+  word: string;
+  data?: TimestampedValue[];
+}
