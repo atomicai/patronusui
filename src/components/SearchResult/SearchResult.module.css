@@ -1,0 +1,13 @@
+.keywordsModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95vw;
+    height: 95vh;
+    background-color: #12071F;
+    border: 1px solid #A456F0;
+    border-radius: 1em;
+    padding: 1em;
+    color: white;
+}

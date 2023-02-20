@@ -1,6 +1,7 @@
 export type Data = {
   docs: Doc[]
   title?: string;
+  keywords?: KeywordDistributionData[];
 }
 
 export type Query = {

@@ -10,7 +10,7 @@ import { Tooltip } from '@mui/material'
 import { ArchiveBoxXMarkIcon, ChartBarSquareIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import { SearchResult } from '../SearchResult';
-import { Data, Doc } from '../../@types/search';
+import { Data } from '../../@types/search';
 import styles from './LazyFigures.module.css';
 
 interface LazyFiguresProps {
@@ -23,8 +23,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
   const [ isFigureLoading, setIsFigureLoading ] = useState(false);
   const [ topic, setTopic ] = useState('');
   const [ isTopicLoading, setIsTopicLoading ] = useState(false);
-  const [ docs, setDocs ] = useState<Doc[]>([]);
-  const [ docsTitle, setDocsTitle ] = useState('');
+  const [ searchResponse, setSearchResponse ] = useState<Data>({ docs: [] });
 
   useEffect(() => {
     setFigureUrl('');
@@ -73,8 +72,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
             topic_name: clickedTopic,
             api: figureUrl || 'default',
           });
-          setDocs(data.docs);
-          setDocsTitle(data.title || '');
+          setSearchResponse(data);
         } catch (e) {
           toast.error((e as Error).message);
         }
@@ -106,7 +104,15 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                       </button>
                     </Tooltip>
                     <div className={`pt-2 pb-8 px-2 w-full flex flex-col justify-center items-center  text-white ${styles.topicWrapper}`}>
-                      {isTopicLoading ? <Spinner /> : <SearchResult title={docsTitle || topic} found={docs} />}
+                      {
+                        isTopicLoading
+                          ? <Spinner />
+                          : <SearchResult
+                            title={searchResponse.title || topic}
+                            found={searchResponse.docs}
+                            keywords={searchResponse.keywords || []}
+                          />
+                      }
                     </div>
                   </div>
                 )}

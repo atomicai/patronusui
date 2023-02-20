@@ -22,7 +22,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
   };
 
   return (
-    <div className="h-full flex p-4">
+    <div className="h-full flex">
       <div className="h-full flex-1">
         <ResponsiveContainer>
           <LineChart>
@@ -43,9 +43,9 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex flex-col p-8">
+      <div className="flex flex-col justify-end p-8">
         {translatedData.map((item, idx) => (
-          <div key={item.word} className="my-1">
+          <div key={item.word} className="my-1 min-w-max">
             <label className={`cursor-pointer ${styles[`label${idx}`]}`}>
               <input type="checkbox" checked={hidden.indexOf(idx) === -1} onChange={(e) => toggleHidden(e, idx)}/>
               <span className="ml-2">{item.word}</span>

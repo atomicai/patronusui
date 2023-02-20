@@ -1,24 +1,30 @@
 import { FC, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Doc } from '../../@types/search';
+import { Doc, KeywordDistributionData } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
 import { BriefDoc, StyleIndexes } from './BriefDoc';
 import { FavoriteDoc } from './FavoriteDoc';
-import { ArrowDownTrayIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Tooltip } from '@mui/material';
+import { ArrowDownTrayIcon, ChevronRightIcon, PresentationChartLineIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import Tooltip from '@mui/material/Tooltip';
+import Modal from '@mui/material/Modal';
+import styles from './SearchResult.module.css';
+import { KeywordsDistribution } from '../KeywordsDistribution';
 
 interface SearchResultProps {
   title?: string;
   found: Doc[];
+  keywords?: KeywordDistributionData[];
+
 }
-export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
+export const SearchResult: FC<SearchResultProps> = ({ title, found, keywords }) => {
   const [pageSize] = useState(6);
   const [page, setPage] = useState(0);
   const [maxPage, setMaxPage] = useState(0);
   const [list, setList] = useState<Doc[]>([]);
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
+  const [areKeywordsShown, setAreKeywordsShown] = useState(false);
 
   useEffect(() => {
     setPage(0);
@@ -70,7 +76,28 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found }) => {
 
   return (
     <div className="w-full h-full">
-      {title && <div className="text-lg font-bold text-center mb-4">{title}</div>}
+      {(title || keywords?.length) && <div className="text-lg font-bold text-center mb-4">
+        {title}
+        {!!keywords?.length && <button className="hover:text-primary relative left-4 top-3" onClick={() => setAreKeywordsShown(true)}>
+          <PresentationChartLineIcon className="w-8 h-8"  />
+        </button>}
+        {areKeywordsShown && (
+          <Modal
+            open={areKeywordsShown}
+            onClose={() => setAreKeywordsShown(false)}
+            slotProps={{ backdrop: { style: { backgroundColor: 'rgb(17,24,39,0.75)' } } }}
+          >
+            <div className={styles.keywordsModal}>
+              <div className="w-full h-full relative pt-8">
+                <button className="absolute top-0 right-4 hover:text-primary" onClick={() => setAreKeywordsShown(false)}>
+                  <XMarkIcon className="w-8 h-8" />
+                </button>
+                <KeywordsDistribution data={keywords || []} />
+              </div>
+            </div>
+          </Modal>
+        )}
+      </div>}
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 pt-8 pb-4 relative">
           {
