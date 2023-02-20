@@ -11,38 +11,104 @@ import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
 import Modal from '@mui/material/Modal';
 import styles from './SearchResult.module.css';
 
+type DocVariant = 'tiles' | 'snippets';
+
 interface SearchResultProps {
   title?: string;
   found: Doc[];
-  variant?: 'tiles' | 'snippets';
+  variant?: DocVariant;
+  append?: boolean
+  pageSize?: number;
 }
-export const SearchResult: FC<SearchResultProps> = ({ title, found, variant = 'snippets' }) => {
-  const [pageSize] = useState(6);
+
+const defaultPageSize = 6;
+const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
+
+export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, variant = 'snippets', pageSize = defaultPageSize }) => {
   const [page, setPage] = useState(0);
-  const [maxPage, setMaxPage] = useState(0);
-  const [list, setList] = useState<Doc[]>([]);
+  const [validPageSize, setValidPageSize] = useState(validatePageSize(pageSize));
+  const [maxPage, setMaxPage] = useState((variant === 'snippets') ? 0 : Math.ceil(found.length / validatePageSize(pageSize)) - 1);
+  const [list, setList] = useState<Doc[]>([...found]);
+  const [slice, setSlice] = useState<Doc[]>((variant === 'snippets') ? [...found] : [...found.slice(0, validatePageSize(pageSize))]);
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
+  // const prevAppendRef = useRef<boolean>();
+
+  // useEffect(() => {
+  //   console.log('useEffect');
+  //   // prevAppendRef.current = append || false;
+  //   const newPageSize = pageSize > 0 ? pageSize : defaultPageSize;
+  //   setValidPageSize(newPageSize);
+  //   setPage(0);
+  //   setMaxPage((variant === 'snippets') ? 0 : Math.ceil(found.length / newPageSize) - 1);
+  //   setList([...found]);
+  //   setSlice((variant === 'snippets') ? [...found] : [...found.slice(0, newPageSize)])
+  // }, []);
+
+  useEffect(() => {
+    console.log('validPageSize', validPageSize);
+    setPage(0);
+    setMaxPage((variant === 'snippets') ? 0 : Math.ceil(list.length / validPageSize) - 1);
+    setSlice((variant === 'snippets') ? [...list] : [...list.slice(0, validPageSize)])
+  }, [validPageSize]);
+
+  useEffect(() => {
+    console.log('pageSize', pageSize);
+    const newPageSize = pageSize > 0 ? pageSize : defaultPageSize;
+    setValidPageSize(newPageSize);
+  }, [pageSize]);
+
+  useEffect(() => {
+    console.log('append', append);
+  }, [append]);
 
   useEffect(() => {
     setPage(0);
-    setMaxPage(Math.ceil(found.length / pageSize) - 1);
-    setFavorites([]);
-    if (variant === 'tiles') {
-      setList([...found.slice(0, pageSize)]);
-    } else if (variant === 'snippets') {
-      setList([...found]);
-    }
-  }, [found, pageSize, variant]);
+    setMaxPage((variant === 'snippets') ? 0 : Math.ceil(list.length / validPageSize) - 1);
+    setSlice((variant === 'snippets') ? [...list] : [...list.slice(0, validPageSize)])
+  }, [variant]);
 
   useEffect(() => {
-    if (variant === 'tiles') {
-      const offset = pageSize * page;
-      setList([...found.slice(offset, offset + pageSize)]);
-    } else if (variant === 'snippets') {
-      setList([...found]);
-    }
-  }, [page, pageSize, found, variant]);
+    console.log('found', found);
+    setPage(prev => append ? prev : 0);
+    setMaxPage((variant === 'snippets') ? 0 : Math.ceil((append ? list.length : 0) + found.length / validPageSize) - 1)
+    setList(prev => append ? [...prev, ...found] : [...found]);
+    setSlice((variant === 'snippets')
+      ? (append ? [...list, ...found] : [...found])
+      : (append ? [...list, ...found] : [...found]).slice(validPageSize * (append ? page : 0), validPageSize * ((append ? page : 0) + 1))
+    );
+  }, [found]);
+
+  // useEffect(() => {
+  //   setSlice((variant === 'snippets') ? [...list] : [...list.slice(0, pageSize)]);
+  // }, [list, page, maxPage])
+
+  // useEffect(() => {
+  //   setPage(prev => append ? prev : 0);
+  //   setMaxPage(Math.ceil((append ? list.length : 0) + found.length / pageSize) - 1);
+  //   setList(prev => {
+  //     if (variant === 'tiles') {
+  //       return[...found.slice(0, pageSize)];
+  //     }
+  //     if (variant === 'snippets') {
+  //       return [...(append ? prev : []), ...found];
+  //     }
+  //     return [];
+  //   });
+  // }, [found, pageSize, variant]);
+  //
+  // useEffect(() => {
+  //   setList(prev => {
+  //     if (variant === 'tiles') {
+  //       const offset = pageSize * page;
+  //       return [...found.slice(offset, offset + pageSize)];
+  //     }
+  //     if (variant === 'snippets') {
+  //       return [...(append ? prev : []), ...found];
+  //     }
+  //     return [];
+  //   })
+  // }, [page, pageSize, found, variant]);
 
   const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
     if (delta > 0) {
@@ -94,7 +160,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, variant = 's
                   {(variant === 'tiles') && (
                     <>
                       <div className="flex flex-wrap justify-center items-center">
-                        {list.map((item, idx) =>(
+                        {slice.map((item, idx) =>(
                           <TileDoc
                             key={idx}
                             doc={item}
@@ -115,7 +181,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, variant = 's
                   )}
                   {(variant === 'snippets') && (
                     <div className="h-[80vh] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto">
-                      {list.map((item, idx) => (
+                      {slice.map((item, idx) => (
                         <SnippetDoc
                           key={idx}
                           doc={item}
@@ -128,7 +194,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, variant = 's
                   )}
                 </>
               )
-              : <div className="text-center my-8">Nothing is found</div>
+              : <div className="text-center my-8">No data</div>
           }
         </div>
         <div className="border-[#A456F0] border-l p-4 pl-8">
