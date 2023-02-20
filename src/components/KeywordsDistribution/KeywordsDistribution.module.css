@@ -1,20 +1,40 @@
 .label0 { color: cyan; }
-.color0 path { stroke: cyan; }
+.stroke0 path { stroke: cyan; }
+.fill0 { fill: cyan; }
+
 .label1 { color: orange; }
-.color1 path { stroke: orange; }
+.stroke1 path { stroke: orange; }
+.fill1 { fill: orange; }
+
 .label2 { color: yellow; }
-.color2 path { stroke: yellow; }
+.stroke2 path { stroke: yellow; }
+.fill2 { fill: yellow; }
+
 .label3 { color: white; }
-.color3 path { stroke: white; }
+.stroke3 path { stroke: white; }
+.fill3 { fill: white; }
+
 .label4 { color: green; }
-.color4 path { stroke: green; }
+.stroke4 path { stroke: green; }
+.fill4 { fill: green; }
+
 .label5 { color: red; }
-.color5 path { stroke: red; }
+.stroke5 path { stroke: red; }
+.fill5 { fill: red; }
+
 .label6 { color: magenta; }
-.color6 path { stroke: magenta; }
+.stroke6 path { stroke: magenta; }
+.fill6 { fill: magenta; }
+
 .label7 { color: gray; }
-.color7 path { stroke: gray; }
+.stroke7 path { stroke: gray; }
+.fill7 { fill: gray; }
+
 .label8 { color: brown; }
-.color8 path { stroke: brown; }
+.stroke8 path { stroke: brown; }
+.fill8 { fill: brown; }
+
 .label9 { color: blue; }
-.color9 path { stroke: blue; }
+.stroke9 path { stroke: blue; }
+.fill9 { fill: blue; }
+
