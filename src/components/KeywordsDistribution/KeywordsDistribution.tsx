@@ -180,7 +180,7 @@ const prepareData = (data: KeywordDistributionData[]): [LinearData, BarData, Ran
   const transformed = data.map(({ word, data }) => ({
     word,
     data: (data || [])
-      .map(({ value, timestamp }) => ({ value, unixtime: (new Date(timestamp)).valueOf() }))
+      .map(({ value, timestamp }) => ({ value, unixtime: (new Date(toIsoString(timestamp))).valueOf() }))
       .sort((a, b) => a.unixtime - b.unixtime),
   }));
   const minX: number[] = [];
