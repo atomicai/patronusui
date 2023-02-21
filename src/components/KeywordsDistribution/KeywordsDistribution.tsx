@@ -2,6 +2,7 @@ import { FC, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'r
 import { KeywordDistributionData } from '../../@types/search';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
 import Slider from '@mui/material/Slider';
+import { toast } from 'react-hot-toast';
 
 interface KeywordsDistributionProps {
   data: KeywordDistributionData[];
@@ -39,12 +40,19 @@ const diagramColors = [
 ];
 const diagramColorsLength = diagramColors.length;
 
-const minSliderDistance = 3600;
-const xDelta = 86400;
+const minSliderDistance = 3600000;
+const xDelta = 86400000;
 const yDelta = 1;
 
 export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) => {
-  const [linearData, barData, domainX, domainY] = useMemo(() => prepareData(data), [data]);
+  const [linearData, barData, domainX, domainY] = useMemo(() => {
+    try {
+      return prepareData(data);
+    } catch (e) {
+      toast.error((e as Error).message);
+      return [[], [], [0, 1] as Range, [0, 1] as Range];
+    }
+  }, [data]);
   const [hidden, setHidden] = useState<number[]>([]);
   const [type, setType] = useState<KeywordsDistributionType>(KeywordsDistributionType.linear);
 
@@ -166,7 +174,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
   );
 };
 
-const unixTimeFormatter = (unixtime: number) => (new Date(unixtime)).toLocaleDateString('ru-RU');
+const unixTimeFormatter = (unixtime: number) => (new Date(unixtime)).toLocaleString('ru-RU');
 
 const prepareData = (data: KeywordDistributionData[]): [LinearData, BarData, Range, Range] => {
   const transformed = data.map(({ word, data }) => ({
@@ -201,3 +209,12 @@ const prepareData = (data: KeywordDistributionData[]): [LinearData, BarData, Ran
     [Math.min(...minY) - yDelta, Math.max(...maxY) + yDelta],
   ];
 };
+
+const pattern = /^(\d\d)\/(\d\d)\/(\d\d\d\d) (\d\d):(\d\d):(\d\d)$/;
+const toIsoString = (timestring: string) => {
+  const m = pattern.exec(timestring);
+  if (!m) {
+    throw Error(`Unsupported date format: '${timestring}'`);
+  }
+  return `${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:${m[6]}`;
+}
