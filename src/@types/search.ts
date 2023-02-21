@@ -1,7 +1,7 @@
 export type Data = {
   docs: Doc[]
   title?: string;
-  keywords?: KeywordDistributionData[];
+  keywords?: KeywordDistributionData;
 }
 
 export type Query = {
@@ -47,7 +47,4 @@ export interface TimestampedValue {
   value: number;
 }
 
-export interface KeywordDistributionData {
-  word: string;
-  data?: TimestampedValue[];
-}
+export type KeywordDistributionData = Record<string, TimestampedValue[]>

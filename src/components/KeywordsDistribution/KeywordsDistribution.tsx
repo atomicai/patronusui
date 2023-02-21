@@ -5,7 +5,7 @@ import Slider from '@mui/material/Slider';
 import { toast } from 'react-hot-toast';
 
 interface KeywordsDistributionProps {
-  data: KeywordDistributionData[];
+  data: KeywordDistributionData;
 }
 
 type Range = [number, number];
@@ -45,12 +45,12 @@ const xDelta = 86400000;
 const yDelta = 1;
 
 export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) => {
-  const [linearData, barData, domainX, domainY] = useMemo(() => {
+  const [linearData, barData, domainX, domainY, words] = useMemo(() => {
     try {
       return prepareData(data);
     } catch (e) {
       toast.error((e as Error).message);
-      return [[], [], [0, 1] as Range, [0, 1] as Range];
+      return [[], [], [0, 1] as Range, [0, 1] as Range, []];
     }
   }, [data]);
   const [hidden, setHidden] = useState<number[]>([]);
@@ -130,8 +130,8 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
               <XAxis dataKey="unixtime" domain={xRange} tickFormatter={unixTimeFormatter} interval={0} angle={-15} />
               <YAxis domain={domainY} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
-              {data.map((s, idx) => (
-                <Bar key={s.word} dataKey={s.word} hide={hidden.indexOf(idx) > -1} fill={diagramColors[idx % diagramColorsLength]} />
+              {words.map((s, idx) => (
+                <Bar key={s} dataKey={s} hide={hidden.indexOf(idx) > -1} fill={diagramColors[idx % diagramColorsLength]} />
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -150,11 +150,11 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
       </div>
       <div className="flex flex-col justify-between p-8 pb-0">
         <div>
-          {data.map((item, idx) => (
-            <div key={item.word} className="min-w-max">
+          {words.map((item, idx) => (
+            <div key={item} className="min-w-max">
               <label className="cursor-pointer" style={{ color: diagramColors[idx % diagramColorsLength] }}>
                 <input type="checkbox" checked={hidden.indexOf(idx) === -1} onChange={(e) => toggleHidden(e, idx)}/>
-                <span className="ml-2">{item.word}</span>
+                <span className="ml-2">{item}</span>
               </label>
             </div>
           ))}
@@ -176,13 +176,17 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
 
 const unixTimeFormatter = (unixtime: number) => (new Date(unixtime)).toLocaleString('ru-RU');
 
-const prepareData = (data: KeywordDistributionData[]): [LinearData, BarData, Range, Range] => {
-  const transformed = data.map(({ word, data }) => ({
-    word,
-    data: (data || [])
-      .map(({ value, timestamp }) => ({ value, unixtime: (new Date(toIsoString(timestamp))).valueOf() }))
-      .sort((a, b) => a.unixtime - b.unixtime),
-  }));
+const prepareData = (data: KeywordDistributionData): [LinearData, BarData, Range, Range, string[]] => {
+  const words: string[] = [];
+  const transformed = Object.keys(data).map((word) => {
+    words.push(word);
+    return {
+      word,
+      data: (data[word] || [])
+        .map(({ value, timestamp }) => ({ value, unixtime: (new Date(toIsoString(timestamp))).valueOf() }))
+        .sort((a, b) => a.unixtime - b.unixtime),
+    };
+  });
   const minX: number[] = [];
   const maxX: number[] = [];
   const minY: number[] = [];
@@ -207,14 +211,15 @@ const prepareData = (data: KeywordDistributionData[]): [LinearData, BarData, Ran
     Object.values(barData).sort((a, b) => a.unixtime - b.unixtime),
     [Math.min(...minX) - xDelta, Math.max(...maxX) + xDelta],
     [Math.min(...minY) - yDelta, Math.max(...maxY) + yDelta],
+    words,
   ];
 };
 
-const pattern = /^(\d\d)\/(\d\d)\/(\d\d\d\d) (\d\d):(\d\d):(\d\d)$/;
+const pattern = /^(\d\d)\/(\d\d)\/(\d\d) (\d\d):(\d\d):(\d\d)$/;
 const toIsoString = (timestring: string) => {
   const m = pattern.exec(timestring);
   if (!m) {
     throw Error(`Unsupported date format: '${timestring}'`);
   }
-  return `${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:${m[6]}`;
+  return `20${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:${m[6]}`;
 }

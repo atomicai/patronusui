@@ -14,7 +14,7 @@ import { KeywordsDistribution } from '../KeywordsDistribution';
 interface SearchResultProps {
   title?: string;
   found: Doc[];
-  keywords?: KeywordDistributionData[];
+  keywords?: KeywordDistributionData;
 
 }
 export const SearchResult: FC<SearchResultProps> = ({ title, found, keywords }) => {
@@ -76,9 +76,9 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, keywords }) 
 
   return (
     <div className="w-full h-full">
-      {(title || keywords?.length) && <div className="text-lg font-bold text-center mb-4">
+      {(title || keywords) && <div className="text-lg font-bold text-center mb-4">
         {title}
-        {!!keywords?.length && <button className="hover:text-primary relative left-4 top-3" onClick={() => setAreKeywordsShown(true)}>
+        {keywords && <button className="hover:text-primary relative left-4 top-3" onClick={() => setAreKeywordsShown(true)}>
           <PresentationChartLineIcon className="w-8 h-8"  />
         </button>}
         {areKeywordsShown && (
@@ -92,7 +92,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, keywords }) 
                 <button className="absolute top-0 right-4 hover:text-primary" onClick={() => setAreKeywordsShown(false)}>
                   <XMarkIcon className="w-8 h-8" />
                 </button>
-                <KeywordsDistribution data={keywords || []} />
+                <KeywordsDistribution data={keywords || {}} />
               </div>
             </div>
           </Modal>
