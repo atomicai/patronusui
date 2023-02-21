@@ -1,38 +1,69 @@
-import { FC, SyntheticEvent, useEffect, useMemo, useState } from 'react';
-import { KeywordDistributionData, TimestampedValue } from '../../@types/search';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { AxisDomain } from 'recharts/types/util/types';
+import { FC, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { KeywordDistributionData } from '../../@types/search';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
+import Slider from '@mui/material/Slider';
 
 interface KeywordsDistributionProps {
   data: KeywordDistributionData[];
 }
+
+type Range = [number, number];
+type LinearData = {data: {unixtime: number, value: number}[], word: string}[];
+type BarData = Record<'unixtime' | string, number>[];
 
 enum KeywordsDistributionType {
   linear = 'linear',
   bar = 'bar',
 }
 
+const tooltipContentStyle = {
+  backgroundColor: '#12071F',
+  border: '1px solid #A456F0',
+  borderRadius: '0.5em',
+};
+const tooltipLabelStyle = {
+  fontWeight: 'bold',
+};
+
 const diagramColors = [
   'cyan',
   'orange',
-  'yellow',
-  'white',
   'green',
   'red',
   'magenta',
   'gray',
   'brown',
   'blue',
+  'yellow',
+  'white',
 ];
 const diagramColorsLength = diagramColors.length;
 
+const minSliderDistance = 3600;
+const xDelta = 86400;
+const yDelta = 1;
+
 export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) => {
+  const [linearData, barData, domainX, domainY] = useMemo(() => prepareData(data), [data]);
   const [hidden, setHidden] = useState<number[]>([]);
   const [type, setType] = useState<KeywordsDistributionType>(KeywordsDistributionType.linear);
-  const [linearData, linearDomainX, linearDomainY] = useMemo(() => prepareData(data, KeywordsDistributionType.linear), [data]);
-  const [barData, barDomainX, barDomainY] = useMemo(() => prepareData(data, KeywordsDistributionType.bar), [data]);
+
+  const [xRange, setXRange] = useState<Range>(domainX);
+  const [linear, setLinear] = useState<LinearData>(linearData);
+  const [bar, setBar] = useState<BarData>(barData);
 
   useEffect(() => setHidden([]), [data]);
+
+  useEffect(() => {
+    setLinear(linearData.map(item => ({
+      ...item,
+      data: item.data.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])),
+    })));
+  }, [linearData, xRange, domainY]);
+
+  useEffect(() => {
+    setBar(barData.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])));
+  }, [barData, xRange, domainY]);
 
   const toggleHidden =(e: SyntheticEvent, idx: number) => {
     if (!(e.target as HTMLInputElement).checked) {
@@ -44,17 +75,34 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
 
   const toggleType = (type: KeywordsDistributionType) => setType(type);
 
+  const handleSlider = useCallback((event: Event, newValue: number | number[], activeThumb: number) => {
+    if (!Array.isArray(newValue)) {
+      return;
+    }
+    if (newValue[1] - newValue[0] < minSliderDistance) {
+      if (activeThumb === 0) {
+        const clamped = Math.min(newValue[0], domainX[1] - minSliderDistance);
+        setXRange([clamped, clamped + minSliderDistance]);
+      } else {
+        const clamped = Math.max(newValue[1], domainX[0] + minSliderDistance);
+        setXRange([clamped - minSliderDistance, clamped]);
+      }
+    } else {
+      setXRange(newValue as Range);
+    }
+  }, [domainX]);
+
   return (
     <div className="h-full flex">
-      <div className="h-full flex-1">
+      <div className="h-full flex-1 pb-16 relative">
         {(type === KeywordsDistributionType.linear) && (
           <ResponsiveContainer>
             <LineChart>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="unixtime" type="number" domain={linearDomainX} tickFormatter={tickFormatter} interval={0} />
-              <YAxis dataKey="value" domain={linearDomainY} />
-              <Tooltip />
-              {linearData.map((s, idx) => (
+              <XAxis dataKey="unixtime" type="number" domain={xRange} tickFormatter={unixTimeFormatter} interval={0} angle={-15} />
+              <YAxis dataKey="value" domain={domainY} />
+              <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
+              {linear.map((s, idx) => (
                 <Line
                   key={s.word}
                   dataKey="value"
@@ -69,19 +117,30 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
         )}
         {(type === KeywordsDistributionType.bar) && (
           <ResponsiveContainer>
-            <BarChart data={barData}>
+            <BarChart data={bar}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="unixtime" domain={barDomainX} tickFormatter={tickFormatter} interval={0} />
-              <YAxis domain={barDomainY} />
-              <Tooltip />
+              <XAxis dataKey="unixtime" domain={xRange} tickFormatter={unixTimeFormatter} interval={0} angle={-15} />
+              <YAxis domain={domainY} />
+              <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {data.map((s, idx) => (
                 <Bar key={s.word} dataKey={s.word} hide={hidden.indexOf(idx) > -1} fill={diagramColors[idx % diagramColorsLength]} />
               ))}
             </BarChart>
           </ResponsiveContainer>
         )}
+        <div className="absolute left-0 right-0 bottom-0 pl-24 pr-8">
+          <Slider
+            min={domainX[0]}
+            max={domainX[1]}
+            value={xRange}
+            onChange={handleSlider}
+            valueLabelDisplay="auto"
+            valueLabelFormat={unixTimeFormatter}
+            disableSwap
+          />
+        </div>
       </div>
-      <div className="flex flex-col justify-between p-8">
+      <div className="flex flex-col justify-between p-8 pb-0">
         <div>
           {data.map((item, idx) => (
             <div key={item.word} className="min-w-max">
@@ -107,20 +166,14 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
   );
 };
 
-const xDelta = 86400;
-const yDelta = 1;
+const unixTimeFormatter = (unixtime: number) => (new Date(unixtime)).toLocaleDateString('ru-RU');
 
-const tickFormatter = (unixtime: number) => (new Date(unixtime)).toLocaleDateString('ru-RU');
-
-const translateTimestamps = (data: TimestampedValue[]) => data.map(({ value, timestamp }) => ({
-  value,
-  unixtime: (new Date(timestamp)).valueOf(),
-}));
-
-const prepareData = (data: KeywordDistributionData[], type: KeywordsDistributionType) => {
+const prepareData = (data: KeywordDistributionData[]): [LinearData, BarData, Range, Range] => {
   const transformed = data.map(({ word, data }) => ({
     word,
-    data: translateTimestamps(data || []).sort((a, b) => a.unixtime - b.unixtime),
+    data: (data || [])
+      .map(({ value, timestamp }) => ({ value, unixtime: (new Date(timestamp)).valueOf() }))
+      .sort((a, b) => a.unixtime - b.unixtime),
   }));
   const minX: number[] = [];
   const maxX: number[] = [];
@@ -135,19 +188,16 @@ const prepareData = (data: KeywordDistributionData[], type: KeywordsDistribution
       maxX.push(Math.max(...unixtimes));
       minY.push(Math.min(...values));
       maxY.push(Math.max(...values));
-      if (type === KeywordsDistributionType.bar) {
-        item.data.forEach(s => {
-          const unixtime = s.unixtime;
-          barData[unixtime] = { ...barData[unixtime], unixtime, [item.word]: s.value };
-        });
-      }
+      item.data.forEach(s => {
+        const unixtime = s.unixtime;
+        barData[unixtime] = { ...barData[unixtime], unixtime, [item.word]: s.value };
+      });
     }
   });
   return [
-    (type === KeywordsDistributionType.bar)
-      ? Object.values(barData).sort((a, b) => a.unixtime - b.unixtime)
-      : transformed,
-    [Math.min(...minX) - xDelta, Math.max(...maxX) + xDelta] as AxisDomain,
-    [Math.min(...minY) - yDelta, Math.max(...maxY) + yDelta] as AxisDomain,
-  ] as const;
+    transformed,
+    Object.values(barData).sort((a, b) => a.unixtime - b.unixtime),
+    [Math.min(...minX) - xDelta, Math.max(...maxX) + xDelta],
+    [Math.min(...minY) - yDelta, Math.max(...maxY) + yDelta],
+  ];
 };
