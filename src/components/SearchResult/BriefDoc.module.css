@@ -53,6 +53,7 @@
     line-clamp: 5;
     -webkit-box-orient: vertical;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 .truncatedText:hover {
     cursor: pointer;
