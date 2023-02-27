@@ -107,7 +107,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
           <ResponsiveContainer>
             <LineChart>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="unixtime" type="number" domain={xRange} tickFormatter={unixTimeFormatter} interval={0} angle={-15} />
+              <XAxis dataKey="unixtime" type="number" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
               <YAxis dataKey="value" domain={domainY} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {linear.map((s, idx) => (
@@ -127,7 +127,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
           <ResponsiveContainer>
             <BarChart data={bar}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="unixtime" domain={xRange} tickFormatter={unixTimeFormatter} interval={0} angle={-15} />
+              <XAxis dataKey="unixtime" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
               <YAxis domain={domainY} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {words.map((s, idx) => (
