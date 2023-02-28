@@ -55,21 +55,19 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   const [areKeywordsShown, setAreKeywordsShown] = useState(false);
 
   useEffect(() => {
-    setPage(0);
-    setMaxPage(calcMaxPage(variant, validPageSize, list));
-    setSlice(calcSlice(variant, validPageSize, 0, list))
-  }, [validPageSize]);
-
-  useEffect(() => {
     const newPageSize = pageSize > 0 ? pageSize : defaultPageSize;
     setValidPageSize(newPageSize);
   }, [pageSize]);
 
   useEffect(() => {
+    setSlice(calcSlice(variant, validPageSize, page, list));
+  }, [page]);
+
+  useEffect(() => {
     setPage(0);
     setMaxPage(calcMaxPage(variant, validPageSize, list));
     setSlice(calcSlice(variant, validPageSize, 0, list))
-  }, [variant]);
+  }, [validPageSize, variant]);
 
   useEffect(() => {
     setPage(prev => append ? prev : 0);
@@ -77,10 +75,6 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
     setList(prev => append ? [...prev, ...found] : [...found]);
     setSlice(calcSlice(variant, validPageSize, page, [...(append ? list : []), ...found]));
   }, [found]);
-
-  useEffect(() => {
-    setSlice(calcSlice(variant, validPageSize, page, list));
-  }, [page]);
 
   const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
     docToHandle.upvote = (docToHandle.upvote || 0) + delta;
