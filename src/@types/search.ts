@@ -1,6 +1,7 @@
 export type Data = {
   docs: Doc[]
   title?: string;
+  keywords?: KeywordDistributionData;
 }
 
 export type Query = {
@@ -40,3 +41,10 @@ export type DataFromServer = {
   query: Query
   passage: Passage
 }
+
+export interface TimestampedValue {
+  timestamp: string;
+  value: number;
+}
+
+export type KeywordDistributionData = Record<string, TimestampedValue[]>
