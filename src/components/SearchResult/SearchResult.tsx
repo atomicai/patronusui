@@ -26,6 +26,9 @@ interface SearchResultProps {
 const defaultPageSize = 6;
 const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
 
+const isPositiveVote = (doc: Doc) => (doc.upvote !== undefined) && (doc.upvote > 0);
+const hasNoVote = (doc: Doc) => (doc.upvote === undefined) || (doc.upvote === 0);
+
 export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [page, setPage] = useState(0);
   const [validPageSize, setValidPageSize] = useState(validatePageSize(pageSize));
@@ -34,25 +37,13 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   const [slice, setSlice] = useState<Doc[]>((variant === 'snippets') ? [...found] : [...found.slice(0, validatePageSize(pageSize))]);
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
-  // const prevAppendRef = useRef<boolean>();
   const [areKeywordsShown, setAreKeywordsShown] = useState(false);
-
-  // useEffect(() => {
-  //   console.log('useEffect');
-  //   // prevAppendRef.current = append || false;
-  //   const newPageSize = pageSize > 0 ? pageSize : defaultPageSize;
-  //   setValidPageSize(newPageSize);
-  //   setPage(0);
-  //   setMaxPage((variant === 'snippets') ? 0 : Math.ceil(found.length / newPageSize) - 1);
-  //   setList([...found]);
-  //   setSlice((variant === 'snippets') ? [...found] : [...found.slice(0, newPageSize)])
-  // }, []);
 
   useEffect(() => {
     console.log('validPageSize', validPageSize);
     setPage(0);
     setMaxPage((variant === 'snippets') ? 0 : Math.ceil(list.length / validPageSize) - 1);
-    setSlice((variant === 'snippets') ? [...list] : [...list.slice(0, validPageSize)])
+    setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
   }, [validPageSize]);
 
   useEffect(() => {
@@ -66,9 +57,10 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   }, [append]);
 
   useEffect(() => {
+    console.log('variant', variant);
     setPage(0);
     setMaxPage((variant === 'snippets') ? 0 : Math.ceil(list.length / validPageSize) - 1);
-    setSlice((variant === 'snippets') ? [...list] : [...list.slice(0, validPageSize)])
+    setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
   }, [variant]);
 
   useEffect(() => {
@@ -77,66 +69,16 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
     setMaxPage((variant === 'snippets') ? 0 : Math.ceil((append ? list.length : 0) + found.length / validPageSize) - 1)
     setList(prev => append ? [...prev, ...found] : [...found]);
     setSlice((variant === 'snippets')
-      ? (append ? [...list, ...found] : [...found])
-      : (append ? [...list, ...found] : [...found]).slice(validPageSize * (append ? page : 0), validPageSize * ((append ? page : 0) + 1))
+      ? (append ? [...list.filter(hasNoVote), ...found] : [...found])
+      : (append ? [...list.filter(hasNoVote), ...found] : [...found]).slice(validPageSize * (append ? page : 0), validPageSize * ((append ? page : 0) + 1))
     );
   }, [found]);
 
-  // useEffect(() => {
-  //   setSlice((variant === 'snippets') ? [...list] : [...list.slice(0, pageSize)]);
-  // }, [list, page, maxPage])
-
-  // useEffect(() => {
-  //   setPage(prev => append ? prev : 0);
-  //   setMaxPage(Math.ceil((append ? list.length : 0) + found.length / pageSize) - 1);
-  //   setList(prev => {
-  //     if (variant === 'tiles') {
-  //       return[...found.slice(0, pageSize)];
-  //     }
-  //     if (variant === 'snippets') {
-  //       return [...(append ? prev : []), ...found];
-  //     }
-  //     return [];
-  //   });
-  // }, [found, pageSize, variant]);
-  //
-  // useEffect(() => {
-  //   setList(prev => {
-  //     if (variant === 'tiles') {
-  //       const offset = pageSize * page;
-  //       return [...found.slice(offset, offset + pageSize)];
-  //     }
-  //     if (variant === 'snippets') {
-  //       return [...(append ? prev : []), ...found];
-  //     }
-  //     return [];
-  //   })
-  // }, [page, pageSize, found, variant]);
-
   const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
-    if (delta > 0) {
-      if (list.includes(docToHandle)) {
-        setList((prev) => prev.filter(item => item !== docToHandle));
-        docToHandle.upvote = 1;
-        setFavorites((prev) => [...prev, docToHandle]);
-      } else {
-        docToHandle.upvote!++;
-        setFavorites((prev) => [...prev]);
-      }
-    } else {
-      const currentUpVote = favorites.find(doc => doc === docToHandle)?.upvote || 0;
-      if (currentUpVote > 1) {
-        docToHandle.upvote!--;
-        setFavorites((prev) => [...prev]);
-      } else if (currentUpVote === 1) {
-        setFavorites(prev => prev.filter((doc) => doc !== docToHandle));
-        docToHandle.upvote = undefined;
-        setList((prev) => [...prev, docToHandle]);
-      } else {
-        setList(prev => prev.filter((doc) => doc !== docToHandle));
-      }
-    }
-  }, [list, setList, favorites, setFavorites]);
+    docToHandle.upvote = (docToHandle.upvote || 0) + delta;
+    setFavorites(list.filter(isPositiveVote));
+    setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
+  }, [list]);
 
   const handleDownload = useCallback(async () => {
     try {
