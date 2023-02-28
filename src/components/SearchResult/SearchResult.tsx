@@ -26,65 +26,71 @@ interface SearchResultProps {
 const defaultPageSize = 6;
 const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
 
-const calcMaxPage = (variant: ViewVariant, pageSize: number, list: Doc[]) =>
-  (variant === 'snippets')
-    ? 0
-    : (Math.ceil(list.filter(hasNoVote).length / pageSize) - 1);
-
 const isPositiveVote = (doc: Doc) => (doc.upvote !== undefined) && (doc.upvote > 0);
 const hasNoVote = (doc: Doc) => (doc.upvote === undefined) || (doc.upvote === 0);
+
+const calcMaxPage = (variant: ViewVariant, pageSize: number, list: Doc[]) => {
+  const maxPage = (variant === 'snippets')
+    ? 0
+    : (Math.ceil(list.filter(hasNoVote).length / pageSize) - 1);
+  return (maxPage > -1) ? maxPage : 0;
+}
+
+const calcSlice = (variant: ViewVariant, pageSize: number, page: number, list: Doc[]) => {
+  const offset = page * pageSize;
+  const filtered = list.filter(hasNoVote);
+  return   (variant === 'snippets')
+    ? filtered
+    : filtered.slice(offset, offset + pageSize);
+};
 
 export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [page, setPage] = useState(0);
   const [validPageSize, setValidPageSize] = useState(validatePageSize(pageSize));
   const [maxPage, setMaxPage] = useState(calcMaxPage(variant, validPageSize, found));
   const [list, setList] = useState<Doc[]>([...found]);
-  const [slice, setSlice] = useState<Doc[]>((variant === 'snippets') ? [...found] : [...found.slice(0, validatePageSize(pageSize))]);
+  const [slice, setSlice] = useState<Doc[]>(calcSlice(variant, validPageSize, 0, found));
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
   const [areKeywordsShown, setAreKeywordsShown] = useState(false);
 
   useEffect(() => {
-    console.log('validPageSize', validPageSize);
     setPage(0);
     setMaxPage(calcMaxPage(variant, validPageSize, list));
-    setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
+    setSlice(calcSlice(variant, validPageSize, 0, list))
   }, [validPageSize]);
 
   useEffect(() => {
-    console.log('pageSize', pageSize);
     const newPageSize = pageSize > 0 ? pageSize : defaultPageSize;
     setValidPageSize(newPageSize);
   }, [pageSize]);
 
   useEffect(() => {
-    console.log('append', append);
-  }, [append]);
-
-  useEffect(() => {
-    console.log('variant', variant);
     setPage(0);
     setMaxPage(calcMaxPage(variant, validPageSize, list));
-    setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
+    setSlice(calcSlice(variant, validPageSize, 0, list))
   }, [variant]);
 
   useEffect(() => {
-    console.log('found', found);
     setPage(prev => append ? prev : 0);
     setMaxPage(calcMaxPage(variant, validPageSize, [...(append ? list : []), ...found]));
     setList(prev => append ? [...prev, ...found] : [...found]);
-    setSlice((variant === 'snippets')
-      ? (append ? [...list.filter(hasNoVote), ...found] : [...found])
-      : (append ? [...list.filter(hasNoVote), ...found] : [...found]).slice(validPageSize * (append ? page : 0), validPageSize * ((append ? page : 0) + 1))
-    );
+    setSlice(calcSlice(variant, validPageSize, page, [...(append ? list : []), ...found]));
   }, [found]);
+
+  useEffect(() => {
+    setSlice(calcSlice(variant, validPageSize, page, list));
+  }, [page]);
 
   const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
     docToHandle.upvote = (docToHandle.upvote || 0) + delta;
     setFavorites(list.filter(isPositiveVote));
-    setMaxPage(calcMaxPage(variant, validPageSize, list));
-    setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
-  }, [list]);
+    const newMaxPage = calcMaxPage(variant, validPageSize, list);
+    const newPage = (page > newMaxPage) ? newMaxPage : page;
+    setPage(newPage);
+    setMaxPage(newMaxPage);
+    setSlice(calcSlice(variant, validPageSize, newPage, list));
+  }, [list, variant, page, validPageSize]);
 
   const handleDownload = useCallback(async () => {
     try {
