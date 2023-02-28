@@ -114,7 +114,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
                 <>
                   {
                     s.data.length
-                      ? <Line type="monotone"
+                      ? <Line
                         key={s.word}
                         dataKey="value"
                         data={s.data} name={s.word as string}
