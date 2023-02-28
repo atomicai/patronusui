@@ -23,27 +23,6 @@ interface SearchResultProps {
   keywords?: KeywordDistributionData;
 }
 
-const defaultPageSize = 6;
-const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
-
-const isPositiveVote = (doc: Doc) => (doc.upvote !== undefined) && (doc.upvote > 0);
-const hasNoVote = (doc: Doc) => (doc.upvote === undefined) || (doc.upvote === 0);
-
-const calcMaxPage = (variant: ViewVariant, pageSize: number, list: Doc[]) => {
-  const maxPage = (variant === 'snippets')
-    ? 0
-    : (Math.ceil(list.filter(hasNoVote).length / pageSize) - 1);
-  return (maxPage > -1) ? maxPage : 0;
-}
-
-const calcSlice = (variant: ViewVariant, pageSize: number, page: number, list: Doc[]) => {
-  const offset = page * pageSize;
-  const filtered = list.filter(hasNoVote);
-  return   (variant === 'snippets')
-    ? filtered
-    : filtered.slice(offset, offset + pageSize);
-};
-
 interface SearchResultState {
   page: number;
   pageSize: number;
@@ -53,6 +32,7 @@ interface SearchResultState {
   variant: ViewVariant;
   append: boolean;
 }
+
 type SearchResultAction =
   { type: 'variant', variant: ViewVariant } |
   { type: 'pageSize', pageSize: number } |
@@ -60,87 +40,10 @@ type SearchResultAction =
   { type: 'vote' } |
   { type: 'append', append: boolean } |
   { type: 'list', list: Doc[] }
-const reducer = (state: SearchResultState, action: SearchResultAction) => {
-  switch (action.type) {
-    case 'variant': {
-      const page = 0;
-      return {
-        ...state,
-        variant: action.variant,
-        page,
-        maxPage: calcMaxPage(action.variant, state.pageSize, state.list),
-        slice: calcSlice(action.variant, state.pageSize, page, state.list)
-      } ;
-    }
-    case 'append': {
-      return {
-        ...state,
-        append: action.append,
-      };
-    }
-    case 'pageSize': {
-      const newPageSize = validatePageSize(action.pageSize);
-      const page = 0;
-      return (newPageSize === state.pageSize)
-        ? state
-        : {
-          ...state,
-          pageSize: newPageSize,
-          page,
-          maxPage: calcMaxPage(state.variant, newPageSize, state.list),
-          slice: calcSlice(state.variant, newPageSize, page, state.list)
-        };
-    }
-    case 'page': {
-      const newPage = (action.page < 0) ? 0 : ((action.page > state.maxPage) ? state.maxPage : action.page);
-      return (newPage === state.page)
-        ? state
-        : {
-          ...state,
-          page: newPage,
-          slice: calcSlice(state.variant, state.pageSize, newPage, state.list),
-        }
-    }
-    case 'vote': {
-      const newMaxPage = calcMaxPage(state.variant, state.pageSize, state.list);
-      const newPage = (state.page > newMaxPage) ? newMaxPage : state.page;
-      return {
-        ...state,
-        page: newPage,
-        maxPage: newMaxPage,
-        slice: calcSlice(state.variant, state.pageSize, newPage, state.list),
-      };
-    }
-    case 'list': {
-      const page = state.append ? state.page : 0;
-      const list = [...(state.append ? state.list : []), ...action.list];
-      return {
-        ...state,
-        page,
-        maxPage: calcMaxPage(state.variant, state.pageSize, list),
-        list,
-        slice: calcSlice(state.variant, state.pageSize, page, list),
-      }
-    }
-  }
-  return state;
-}
 
 type CreateInitialStateType = (arg: Required<Pick<SearchResultProps, 'found' | 'variant' | 'pageSize' | 'append'>>) => SearchResultState;
-const createInitialState: CreateInitialStateType = ({ pageSize, variant, found, append }) => {
-  const page = 0;
-  const validPageSize = validatePageSize(pageSize);
-  return {
-    pageSize: validPageSize,
-    page,
-    maxPage: calcMaxPage(variant, validPageSize, found),
-    list: [...found],
-    slice: calcSlice(variant, validPageSize, page, found),
-    variant,
-    append,
-  }
-};
 
+const defaultPageSize = 6;
 
 export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [favorites, setFavorites] = useState<Doc[]>([]);
@@ -298,4 +201,104 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
       </Modal>
     </div>
   )
+};
+
+const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
+
+const isPositiveVote = (doc: Doc) => (doc.upvote !== undefined) && (doc.upvote > 0);
+const hasNoVote = (doc: Doc) => (doc.upvote === undefined) || (doc.upvote === 0);
+
+const calcMaxPage = (variant: ViewVariant, pageSize: number, list: Doc[]) => {
+  const maxPage = (variant === 'snippets')
+    ? 0
+    : (Math.ceil(list.filter(hasNoVote).length / pageSize) - 1);
+  return (maxPage > -1) ? maxPage : 0;
+}
+
+const calcSlice = (variant: ViewVariant, pageSize: number, page: number, list: Doc[]) => {
+  const offset = page * pageSize;
+  const filtered = list.filter(hasNoVote);
+  return   (variant === 'snippets')
+    ? filtered
+    : filtered.slice(offset, offset + pageSize);
+};
+
+const reducer = (state: SearchResultState, action: SearchResultAction) => {
+  switch (action.type) {
+    case 'variant': {
+      const page = 0;
+      return {
+        ...state,
+        variant: action.variant,
+        page,
+        maxPage: calcMaxPage(action.variant, state.pageSize, state.list),
+        slice: calcSlice(action.variant, state.pageSize, page, state.list)
+      } ;
+    }
+    case 'append': {
+      return {
+        ...state,
+        append: action.append,
+      };
+    }
+    case 'pageSize': {
+      const newPageSize = validatePageSize(action.pageSize);
+      const page = 0;
+      return (newPageSize === state.pageSize)
+        ? state
+        : {
+          ...state,
+          pageSize: newPageSize,
+          page,
+          maxPage: calcMaxPage(state.variant, newPageSize, state.list),
+          slice: calcSlice(state.variant, newPageSize, page, state.list)
+        };
+    }
+    case 'page': {
+      const newPage = (action.page < 0) ? 0 : ((action.page > state.maxPage) ? state.maxPage : action.page);
+      return (newPage === state.page)
+        ? state
+        : {
+          ...state,
+          page: newPage,
+          slice: calcSlice(state.variant, state.pageSize, newPage, state.list),
+        }
+    }
+    case 'vote': {
+      const newMaxPage = calcMaxPage(state.variant, state.pageSize, state.list);
+      const newPage = (state.page > newMaxPage) ? newMaxPage : state.page;
+      return {
+        ...state,
+        page: newPage,
+        maxPage: newMaxPage,
+        slice: calcSlice(state.variant, state.pageSize, newPage, state.list),
+      };
+    }
+    case 'list': {
+      const page = state.append ? state.page : 0;
+      const list = [...(state.append ? state.list : []), ...action.list];
+      return {
+        ...state,
+        page,
+        maxPage: calcMaxPage(state.variant, state.pageSize, list),
+        list,
+        slice: calcSlice(state.variant, state.pageSize, page, list),
+      }
+    }
+  }
+  return state;
+}
+
+const createInitialState: CreateInitialStateType = ({ pageSize, variant, found, append }) => {
+  const page = 0;
+  const validPageSize = validatePageSize(pageSize);
+  return {
+    pageSize: validPageSize,
+    page,
+    maxPage: calcMaxPage(variant, validPageSize, found),
+    list: [...found],
+    slice: calcSlice(variant, validPageSize, page, found),
+    variant,
+    append,
+  }
 };
