@@ -26,7 +26,7 @@ interface SearchResultProps {
 const defaultPageSize = 6;
 const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
 
-export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, variant = 'snippets', pageSize = defaultPageSize  }) => {
+export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [page, setPage] = useState(0);
   const [validPageSize, setValidPageSize] = useState(validatePageSize(pageSize));
   const [maxPage, setMaxPage] = useState((variant === 'snippets') ? 0 : Math.ceil(found.length / validatePageSize(pageSize)) - 1);
@@ -64,7 +64,6 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   useEffect(() => {
     console.log('append', append);
   }, [append]);
-  const [areKeywordsShown, setAreKeywordsShown] = useState(false);
 
   useEffect(() => {
     setPage(0);
