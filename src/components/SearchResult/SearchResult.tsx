@@ -1,15 +1,16 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Doc } from '../../@types/search';
+import { Doc, KeywordDistributionData } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
 import { TileDoc, TileStyleIndexes } from './TileDoc';
 import { FavoriteDoc } from './FavoriteDoc';
-import { ArrowDownTrayIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Tooltip } from '@mui/material';
-import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
+import { ArrowDownTrayIcon, ChevronRightIcon, PresentationChartLineIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import Tooltip from '@mui/material/Tooltip';
 import Modal from '@mui/material/Modal';
 import styles from './SearchResult.module.css';
+import { KeywordsDistribution } from '../KeywordsDistribution';
+import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
 
 type DocVariant = 'tiles' | 'snippets';
 
@@ -19,12 +20,13 @@ interface SearchResultProps {
   variant?: DocVariant;
   append?: boolean
   pageSize?: number;
+  keywords?: KeywordDistributionData;
 }
 
 const defaultPageSize = 6;
 const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
 
-export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, variant = 'snippets', pageSize = defaultPageSize }) => {
+export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [page, setPage] = useState(0);
   const [validPageSize, setValidPageSize] = useState(validatePageSize(pageSize));
   const [maxPage, setMaxPage] = useState((variant === 'snippets') ? 0 : Math.ceil(found.length / validatePageSize(pageSize)) - 1);
@@ -33,6 +35,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
   // const prevAppendRef = useRef<boolean>();
+  const [areKeywordsShown, setAreKeywordsShown] = useState(false);
 
   // useEffect(() => {
   //   console.log('useEffect');
@@ -61,6 +64,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   useEffect(() => {
     console.log('append', append);
   }, [append]);
+  const [areKeywordsShown, setAreKeywordsShown] = useState(false);
 
   useEffect(() => {
     setPage(0);
@@ -150,7 +154,28 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
 
   return (
     <div className="w-full h-full">
-      {title && <div className="text-lg font-bold text-center mb-4">{title}</div>}
+      {(title || keywords) && <div className="text-lg font-bold text-center mb-4">
+        {title}
+        {keywords && <button className="hover:text-primary relative left-4 top-3" onClick={() => setAreKeywordsShown(true)}>
+          <PresentationChartLineIcon className="w-8 h-8"  />
+        </button>}
+        {areKeywordsShown && (
+          <Modal
+            open={areKeywordsShown}
+            onClose={() => setAreKeywordsShown(false)}
+            slotProps={{ backdrop: { style: { backgroundColor: 'rgb(17,24,39,0.75)' } } }}
+          >
+            <div className={styles.keywordsModal}>
+              <div className="w-full h-full relative pt-8">
+                <button className="absolute top-0 right-4 hover:text-primary" onClick={() => setAreKeywordsShown(false)}>
+                  <XMarkIcon className="w-8 h-8" />
+                </button>
+                <KeywordsDistribution data={keywords || {}} />
+              </div>
+            </div>
+          </Modal>
+        )}
+      </div>}
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 pt-8 pb-4 relative">
           {

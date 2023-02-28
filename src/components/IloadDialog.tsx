@@ -1,61 +1,61 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-
-import axios, { AxiosResponse } from 'axios'
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import axios from 'axios'
 import { toast } from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { ColumnCandidates } from '../@types/view';
 
-type Response = {
-  is_text_column_ok: boolean
-  is_date_column_ok: boolean
+interface SuccessLoadingResponse {
+  success: string;
 }
+interface ErrorLoadingResponse {
+  error: string;
+}
+type LoadingResponse = SuccessLoadingResponse | ErrorLoadingResponse;
 
 interface Props {
   open: boolean
   setOpen: (value: boolean) => void
   handleViewing: any
+  columnCandidates: ColumnCandidates;
 }
 
-export default function IloadDialog({ open, setOpen, handleViewing }: Props) {
-  const [textValue, setTextValue] = useState('text')
-  const [dateValue, setDateValue] = useState('datetime')
+const labelStyle = { display: 'inline-block', width: '10em', marginRight: '0.5em' };
+const autocompleteStyle = { width: '15em' };
+
+export default function IloadDialog({ open, setOpen, handleViewing, columnCandidates }: Props) {
+  const [textValue, setTextValue] = useState('');
+  const [dateValue, setDateValue] = useState('');
   const [emailValue, setEmailValue] = useState<string>('')
   const [checkedResults, setCheckedResults] = useState(false)
   const [checkedSubscription, setCheckedSubscription] = useState(false)
-  const navigate = useNavigate()
+
+  useEffect(() => {
+    setTextValue('');
+    setDateValue('');
+  }, [columnCandidates]);
 
   const handleIloading = async () => {
-    const response: AxiosResponse<Response> = await axios.post('/iloading', {
-      email: emailValue === '' ? null : emailValue,
-      text: textValue === '' ? 'text' : textValue,
-      datetime: dateValue === '' ? 'datetime' : dateValue
-    })
-
-    if (response.data.is_date_column_ok && response.data.is_text_column_ok) {
-      handleClose()
-      toast.success('Roger that, indexing in progress...')
-      // setProcessing(true)
-      handleViewing()
-    }
-
-    if (!response.data.is_date_column_ok && response.data.is_text_column_ok) {
-      handleClose()
-      toast.success(
-        'Roger that, datetime column is no specified using default ordering'
-      )
-      // setProcessing(true)
-      handleViewing()
-    }
-
-    if (!response.data.is_text_column_ok) {
-      toast.error('Sorry, but the textual column name does not match')
-      handleClose()
-      // setLoading(false)
-      navigate('/searching')
+    try {
+      const response = await axios.post<LoadingResponse>('/iloading', {
+        email: emailValue === '' ? null : emailValue,
+        text: textValue,
+        datetime: dateValue,
+      }).then(({ data }) => data);
+      const errorMessage = (response as ErrorLoadingResponse).error;
+      if (errorMessage) {
+        throw new Error(errorMessage);
+      }
+      toast.success((response as SuccessLoadingResponse).success || 'Roger that, indexing in progress...');
+      handleClose();
+      handleViewing();
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 
@@ -89,21 +89,28 @@ export default function IloadDialog({ open, setOpen, handleViewing }: Props) {
         </DialogTitle>
         <DialogContent sx={{ paddingBottom: 0 }}>
           <div className="flex flex-row items-center mb-1">
-            <span className="text-xl">Text column name: </span>{' '}
-            <input
+            <span className="text-xl" style={labelStyle}>Text column name: </span>
+            <Autocomplete
+              freeSolo
               value={textValue}
-              onChange={(e) => setTextValue(e.target.value)}
-              className="ml-3 text-base pl-2 text-field"
-              autoFocus={true}
+              onInputChange={(e, v) => setTextValue(v || '')}
+              options={columnCandidates.text || []}
+              renderInput={(params) => <TextField {...params} />}
+              size="small"
+              sx={autocompleteStyle}
             />
           </div>
 
           <div className="flex flex-row items-center">
-            <span className="text-xl">Date column name: </span>{' '}
-            <input
+            <span className="text-xl" style={labelStyle}>Date column name: </span>{' '}
+            <Autocomplete
+              freeSolo
               value={dateValue}
-              onChange={(e) => setDateValue(e.target.value)}
-              className="ml-3 text-base pl-2 text-field"
+              onInputChange={(e, v) => setDateValue(v || '')}
+              options={columnCandidates.datetime || []}
+              renderInput={(params) => <TextField {...params} />}
+              size="small"
+              sx={autocompleteStyle}
             />
           </div>
           <div className="mt-6 text-sm">

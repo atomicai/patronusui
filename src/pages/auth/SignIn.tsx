@@ -2,14 +2,17 @@ import { FirebaseError } from 'firebase/app'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import FBMessage from '../../components/FBMessage/FBMessage'
 import Ownership from '../../components/Ownership/Ownership'
 import { auth } from '../../firebase'
 import GoogleIcon from './components/GoogleIcon'
-import Message from './components/Message'
 import styles from './components/styles/Sign.module.css'
 
 function SignIn() {
-  const [messageContent, setMessageContent] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+
+  const [errorCode, setErrorCode] = useState<string>('')
   const navigate = useNavigate()
 
   const emailRef = useRef<HTMLInputElement>(null)
@@ -20,31 +23,21 @@ function SignIn() {
   }, [])
 
   useEffect(() => {
-    setMessageContent('')
-  }, [emailRef.current?.value, passwordRef.current?.value])
+    setErrorCode('')
+  }, [email, password])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (
-      emailRef.current?.value === undefined ||
-      passwordRef.current?.value === undefined
-    )
-      return
+    if (email === undefined || password === undefined) return
 
-    signInWithEmailAndPassword(
-      auth,
-      emailRef.current?.value,
-      passwordRef.current?.value
-    )
+    signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
-        const user = userCredential.user
         navigate('/isearch')
-        // ...
       })
       .catch((error: FirebaseError) => {
-        setMessageContent(error.message)
+        setErrorCode(error.code)
       })
   }
 
@@ -55,12 +48,18 @@ function SignIn() {
         <Ownership />
       </div>
 
-      {!!messageContent.length && <Message content={messageContent} />}
+      {!!errorCode.length && <FBMessage errorCode={errorCode} />}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
           <p className={styles.labelContent}>Email</p>
-          <input type="text" ref={emailRef} className={styles.input} />
+          <input
+            type="text"
+            ref={emailRef}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={styles.input}
+          />
         </label>
 
         <label className={styles.label}>
@@ -69,6 +68,8 @@ function SignIn() {
             type="password"
             ref={passwordRef}
             autoComplete="true"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className={styles.input}
           />
         </label>

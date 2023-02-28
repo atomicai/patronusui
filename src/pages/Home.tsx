@@ -8,12 +8,16 @@ import axios from 'axios'
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { PlotParams } from 'react-plotly.js'
-import { UploadPayload, ViewPayload } from '../@types/view'
+import { ColumnCandidates, UploadPayload, ViewPayload } from '../@types/view'
 import IloadDialog from '../components/IloadDialog'
 import UploadDialog from '../components/UploadDialog'
 import { useSetAtom, useAtom } from 'jotai'
 import { file, lazyPlots, plots, viewPayload } from '../contexts/UploadContext'
 import { NavLink, useNavigate } from 'react-router-dom'
+
+const getPlot = async (endpoint: string) => {
+  return axios.post(endpoint, {}).then((res) => res.data)
+}
 
 export const Home: React.FC = () => {
   const [open, setOpen] = useState(false)
@@ -28,6 +32,8 @@ export const Home: React.FC = () => {
   const [popup, setPopup] = useState(false)
 
   const navigate = useNavigate()
+
+  const [columnCandidates, setColumnCandidates] = useState<ColumnCandidates>({});
 
   const handleUpload = async (file: File) => {
     const data = new FormData()
@@ -45,7 +51,7 @@ export const Home: React.FC = () => {
       data: data
     }).then((res) => res.data)
 
-    const { is_suffix_ok, filename, is_file_corrupted } = response
+    const { is_suffix_ok, filename, is_file_corrupted, text_columns, datetime_columns } = response
 
     if (!is_suffix_ok) {
       toast.error('File is corrupted. Please, upload a new one.')
@@ -59,13 +65,10 @@ export const Home: React.FC = () => {
 
     if (is_suffix_ok && !is_file_corrupted) {
       toast.success('Request has been processed, please, specify details')
+      setColumnCandidates({ text: text_columns || [], datetime: datetime_columns || [] })
       setPopup(true)
       setFile(filename)
     }
-  }
-
-  const getPlot = async (endpoint: string) => {
-    return axios.post(endpoint, {}).then((res) => res.data)
   }
 
   const handleViewing = async () => {
@@ -83,16 +86,17 @@ export const Home: React.FC = () => {
 
       navigate('/isearch')
     })
-  }
+  };
 
   return (
     <section className="w-full h-full flex justify-center items-center">
       <UploadDialog open={open} setOpen={setOpen} handleUpload={handleUpload} />
-      <IloadDialog
-        open={popup}
+      {popup && <IloadDialog
+        open
         setOpen={setPopup}
         handleViewing={handleViewing}
-      />
+        columnCandidates={columnCandidates}
+      />}
       <div className="flex flex-col items-center justify-center">
         <RocketLaunchIcon
           className={`text-primary hover:cursor-pointer hover:text-white sm:w-[150px] sm:h-[150px] w-[90px] h-[90px] ${
