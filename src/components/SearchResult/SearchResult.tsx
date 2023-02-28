@@ -12,12 +12,12 @@ import styles from './SearchResult.module.css';
 import { KeywordsDistribution } from '../KeywordsDistribution';
 import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
 
-type DocVariant = 'tiles' | 'snippets';
+type ViewVariant = 'tiles' | 'snippets';
 
 interface SearchResultProps {
   title?: string;
   found: Doc[];
-  variant?: DocVariant;
+  variant?: ViewVariant;
   append?: boolean
   pageSize?: number;
   keywords?: KeywordDistributionData;
@@ -26,13 +26,18 @@ interface SearchResultProps {
 const defaultPageSize = 6;
 const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
 
+const calcMaxPage = (variant: ViewVariant, pageSize: number, list: Doc[]) =>
+  (variant === 'snippets')
+    ? 0
+    : (Math.ceil(list.filter(hasNoVote).length / pageSize) - 1);
+
 const isPositiveVote = (doc: Doc) => (doc.upvote !== undefined) && (doc.upvote > 0);
 const hasNoVote = (doc: Doc) => (doc.upvote === undefined) || (doc.upvote === 0);
 
 export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [page, setPage] = useState(0);
   const [validPageSize, setValidPageSize] = useState(validatePageSize(pageSize));
-  const [maxPage, setMaxPage] = useState((variant === 'snippets') ? 0 : Math.ceil(found.length / validatePageSize(pageSize)) - 1);
+  const [maxPage, setMaxPage] = useState(calcMaxPage(variant, validPageSize, found));
   const [list, setList] = useState<Doc[]>([...found]);
   const [slice, setSlice] = useState<Doc[]>((variant === 'snippets') ? [...found] : [...found.slice(0, validatePageSize(pageSize))]);
   const [favorites, setFavorites] = useState<Doc[]>([]);
@@ -42,7 +47,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   useEffect(() => {
     console.log('validPageSize', validPageSize);
     setPage(0);
-    setMaxPage((variant === 'snippets') ? 0 : Math.ceil(list.length / validPageSize) - 1);
+    setMaxPage(calcMaxPage(variant, validPageSize, list));
     setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
   }, [validPageSize]);
 
@@ -59,14 +64,14 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   useEffect(() => {
     console.log('variant', variant);
     setPage(0);
-    setMaxPage((variant === 'snippets') ? 0 : Math.ceil(list.length / validPageSize) - 1);
+    setMaxPage(calcMaxPage(variant, validPageSize, list));
     setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
   }, [variant]);
 
   useEffect(() => {
     console.log('found', found);
     setPage(prev => append ? prev : 0);
-    setMaxPage((variant === 'snippets') ? 0 : Math.ceil((append ? list.length : 0) + found.length / validPageSize) - 1)
+    setMaxPage(calcMaxPage(variant, validPageSize, [...(append ? list : []), ...found]));
     setList(prev => append ? [...prev, ...found] : [...found]);
     setSlice((variant === 'snippets')
       ? (append ? [...list.filter(hasNoVote), ...found] : [...found])
@@ -77,6 +82,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
     docToHandle.upvote = (docToHandle.upvote || 0) + delta;
     setFavorites(list.filter(isPositiveVote));
+    setMaxPage(calcMaxPage(variant, validPageSize, list));
     setSlice((variant === 'snippets') ? [...list.filter(hasNoVote)] : [...list.filter(hasNoVote).slice(0, validPageSize)])
   }, [list]);
 
