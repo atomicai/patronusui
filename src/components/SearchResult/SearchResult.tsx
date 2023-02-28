@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useReducer, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Doc, KeywordDistributionData } from '../../@types/search';
@@ -44,47 +44,126 @@ const calcSlice = (variant: ViewVariant, pageSize: number, page: number, list: D
     : filtered.slice(offset, offset + pageSize);
 };
 
+interface SearchResultState {
+  page: number;
+  pageSize: number;
+  maxPage: number;
+  list: Doc[];
+  slice: Doc[];
+  variant: ViewVariant;
+  append: boolean;
+}
+type SearchResultAction =
+  { type: 'variant', variant: ViewVariant } |
+  { type: 'pageSize', pageSize: number } |
+  { type: 'page', page: number } |
+  { type: 'vote' } |
+  { type: 'append', append: boolean } |
+  { type: 'list', list: Doc[] }
+const reducer = (state: SearchResultState, action: SearchResultAction) => {
+  switch (action.type) {
+    case 'variant': {
+      const page = 0;
+      return {
+        ...state,
+        variant: action.variant,
+        page,
+        maxPage: calcMaxPage(action.variant, state.pageSize, state.list),
+        slice: calcSlice(action.variant, state.pageSize, page, state.list)
+      } ;
+    }
+    case 'append': {
+      return {
+        ...state,
+        append: action.append,
+      };
+    }
+    case 'pageSize': {
+      const newPageSize = validatePageSize(action.pageSize);
+      const page = 0;
+      return (newPageSize === state.pageSize)
+        ? state
+        : {
+          ...state,
+          pageSize: newPageSize,
+          page,
+          maxPage: calcMaxPage(state.variant, newPageSize, state.list),
+          slice: calcSlice(state.variant, newPageSize, page, state.list)
+        };
+    }
+    case 'page': {
+      const newPage = (action.page < 0) ? 0 : ((action.page > state.maxPage) ? state.maxPage : action.page);
+      return (newPage === state.page)
+        ? state
+        : {
+          ...state,
+          page: newPage,
+          slice: calcSlice(state.variant, state.pageSize, newPage, state.list),
+        }
+    }
+    case 'vote': {
+      const newMaxPage = calcMaxPage(state.variant, state.pageSize, state.list);
+      const newPage = (state.page > newMaxPage) ? newMaxPage : state.page;
+      return {
+        ...state,
+        page: newPage,
+        maxPage: newMaxPage,
+        slice: calcSlice(state.variant, state.pageSize, newPage, state.list),
+      };
+    }
+    case 'list': {
+      const page = state.append ? state.page : 0;
+      const list = [...(state.append ? state.list : []), ...action.list];
+      return {
+        ...state,
+        page,
+        maxPage: calcMaxPage(state.variant, state.pageSize, list),
+        list,
+        slice: calcSlice(state.variant, state.pageSize, page, list),
+      }
+    }
+  }
+  return state;
+}
+
+type CreateInitialStateType = (arg: Required<Pick<SearchResultProps, 'found' | 'variant' | 'pageSize' | 'append'>>) => SearchResultState;
+const createInitialState: CreateInitialStateType = ({ pageSize, variant, found, append }) => {
+  const page = 0;
+  const validPageSize = validatePageSize(pageSize);
+  return {
+    pageSize: validPageSize,
+    page,
+    maxPage: calcMaxPage(variant, validPageSize, found),
+    list: [...found],
+    slice: calcSlice(variant, validPageSize, page, found),
+    variant,
+    append,
+  }
+};
+
+
 export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
-  const [page, setPage] = useState(0);
-  const [validPageSize, setValidPageSize] = useState(validatePageSize(pageSize));
-  const [maxPage, setMaxPage] = useState(calcMaxPage(variant, validPageSize, found));
-  const [list, setList] = useState<Doc[]>([...found]);
-  const [slice, setSlice] = useState<Doc[]>(calcSlice(variant, validPageSize, 0, found));
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
   const [areKeywordsShown, setAreKeywordsShown] = useState(false);
 
-  useEffect(() => {
-    const newPageSize = pageSize > 0 ? pageSize : defaultPageSize;
-    setValidPageSize(newPageSize);
-  }, [pageSize]);
+  const [state, dispatch] = useReducer(reducer, { pageSize, variant, found, append }, createInitialState);
 
-  useEffect(() => {
-    setSlice(calcSlice(variant, validPageSize, page, list));
-  }, [page]);
-
-  useEffect(() => {
-    setPage(0);
-    setMaxPage(calcMaxPage(variant, validPageSize, list));
-    setSlice(calcSlice(variant, validPageSize, 0, list))
-  }, [validPageSize, variant]);
-
-  useEffect(() => {
-    setPage(prev => append ? prev : 0);
-    setMaxPage(calcMaxPage(variant, validPageSize, [...(append ? list : []), ...found]));
-    setList(prev => append ? [...prev, ...found] : [...found]);
-    setSlice(calcSlice(variant, validPageSize, page, [...(append ? list : []), ...found]));
-  }, [found]);
+  useEffect(() =>  dispatch({ type: 'pageSize', pageSize }), [pageSize]);
+  useEffect(() =>  dispatch({ type: 'variant', variant }), [variant]);
+  useEffect(() =>  dispatch({ type: 'append', append }), [append]);
+  useEffect(() =>  dispatch({ type: 'list', list: found }), [found]);
 
   const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
     docToHandle.upvote = (docToHandle.upvote || 0) + delta;
-    setFavorites(list.filter(isPositiveVote));
-    const newMaxPage = calcMaxPage(variant, validPageSize, list);
-    const newPage = (page > newMaxPage) ? newMaxPage : page;
-    setPage(newPage);
-    setMaxPage(newMaxPage);
-    setSlice(calcSlice(variant, validPageSize, newPage, list));
-  }, [list, variant, page, validPageSize]);
+    setFavorites(state.list.filter(isPositiveVote));
+    dispatch({ type: 'vote'});
+  }, [state.list]);
+
+  const handleNextPage = useCallback(() => dispatch({
+    type: 'page',
+    page: state.page + 1,
+  }), [state.page]);
 
   const handleDownload = useCallback(async () => {
     try {
@@ -97,7 +176,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
     }
   }, [favorites]);
 
-  const handleDetailedClose = useCallback(() => setDetailedDoc(null), [setDetailedDoc]);
+  const handleDetailedClose = useCallback(() => setDetailedDoc(null), []);
 
   return (
     <div className="w-full h-full">
@@ -132,7 +211,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
                   {(variant === 'tiles') && (
                     <>
                       <div className="flex flex-wrap justify-center items-center">
-                        {slice.map((item, idx) =>(
+                        {state.slice.map((item, idx) =>(
                           <TileDoc
                             key={idx}
                             doc={item}
@@ -142,9 +221,9 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
                           />
                         ))}
                       </div>
-                      {(page < maxPage) && (
+                      {(state.page < state.maxPage) && (
                         <Tooltip title="Next samples" arrow>
-                          <button className="hover:text-primary absolute right-2 top-0" onClick={() => setPage(prev => prev + 1)}>
+                          <button className="hover:text-primary absolute right-2 top-0" onClick={handleNextPage}>
                             <ChevronRightIcon className="w-8 h-8" />
                           </button>
                         </Tooltip>
@@ -153,7 +232,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
                   )}
                   {(variant === 'snippets') && (
                     <div className="h-[80vh] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 overflow-auto">
-                      {slice.map((item, idx) => (
+                      {state.slice.map((item, idx) => (
                         <SnippetDoc
                           key={idx}
                           doc={item}
