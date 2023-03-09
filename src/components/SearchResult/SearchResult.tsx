@@ -211,7 +211,7 @@ const hasNoVote = (doc: Doc) => (doc.upvote === undefined) || (doc.upvote === 0)
 const calcMaxPage = (variant: ViewVariant, pageSize: number, list: Doc[]) => {
   const maxPage = (variant === 'snippets')
     ? 0
-    : (Math.ceil(list.filter(hasNoVote).length / pageSize) - 1);
+    : Math.floor(list.filter(hasNoVote).length / pageSize);
   return (maxPage > -1) ? maxPage : 0;
 }
 
