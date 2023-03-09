@@ -28,10 +28,11 @@ export const SnippetDoc: FC<SnippetDocProps> = ({ doc, onClick, onVote, styleIdx
       <div className={styles.vsColor}>{doc.doc_score || doc.score}</div>
     </div>
     <div className={styles.truncatedText} onClick={onClick}>
-      {/*{doc.text}*/}
+      {(start - textDelta) > 0 ? '... ' : ''}
       {doc.text.substring(start - textDelta, start)}
       <span className={styles.highlighted}>{doc.text.substring(start, finish)}</span>
       {doc.text.substring(finish, finish + textDelta)}
+      {(finish + textDelta) < doc.text.length ? ' ...' : ''}
     </div>
     <div className="flex justify-between items-center">
       <div>{doc.timestamp}</div>

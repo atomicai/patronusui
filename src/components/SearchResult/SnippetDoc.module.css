@@ -66,9 +66,3 @@
 .truncatedText:hover {
     cursor: pointer;
 }
-.truncatedText:before {
-    content: '... ';
-}
-.truncatedText:after {
-    content: ' ...';
-}
