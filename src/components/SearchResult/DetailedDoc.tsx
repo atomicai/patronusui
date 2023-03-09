@@ -33,7 +33,7 @@ const highlightText = (doc: Doc) => {
           </span>
       </Tooltip>
     ))
-    idx = part.hi + 1;
+    idx = part.hi;
   }
   highlightedText.push(breakLines(doc.text.substring(idx)));
 

@@ -15,6 +15,15 @@
   }
 }
 
+@font-face {
+  font-family: GothamMedium;
+  src: url(./assets/fonts/gotham_medium.otf) format("opentype");
+}
+@font-face {
+  font-family: Cyberpunk;
+  src: url(./assets/fonts/cyberpunk.ttf) format("truetype");
+}
+
 * {
   box-sizing: border-box;
 }

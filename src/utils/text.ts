@@ -13,7 +13,7 @@ export const wrapTextParts = (text: string, parts?: DocPart[], tag = 'span') => 
   let idx = 0;
   for (const part of parts) {
     wrappedText += `${text.substring(idx, part.lo)}<${tag} title="${part.score || ''}">${text.substring(part.lo, part.hi)}</${tag}>`;
-    idx = part.hi + 1;
+    idx = part.hi;
   }
   wrappedText += text.substring(idx);
 

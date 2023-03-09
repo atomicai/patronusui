@@ -28,6 +28,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
   useEffect(() => {
     setFigureUrl('');
     setIsFigureLoading(false);
+    setTopic('');
   }, [figure, lazyApi]);
 
   const [cachedLazyPlots, setCachedLazyPlots] = useAtom(lazyPlots);
