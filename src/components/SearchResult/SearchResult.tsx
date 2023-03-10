@@ -1,16 +1,24 @@
-import { FC, useCallback, useEffect, useReducer, useState } from 'react';
+import { FC, forwardRef, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Doc, KeywordDistributionData } from '../../@types/search';
 import { DetailedDoc } from './DetailedDoc';
 import { TileDoc, TileStyleIndexes } from './TileDoc';
 import { FavoriteDoc } from './FavoriteDoc';
-import { ArrowDownTrayIcon, ChevronRightIcon, PresentationChartLineIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowDownTrayIcon,
+  CalendarDaysIcon,
+  ChevronRightIcon,
+  PresentationChartLineIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
 import Tooltip from '@mui/material/Tooltip';
 import Modal from '@mui/material/Modal';
 import styles from './SearchResult.module.css';
 import { KeywordsDistribution } from '../KeywordsDistribution';
 import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
+import { DateRangePicker } from 'rsuite';
+import { DateRange } from 'rsuite/DateRangePicker';
 
 type ViewVariant = 'tiles' | 'snippets';
 
@@ -21,6 +29,7 @@ interface SearchResultProps {
   append?: boolean
   pageSize?: number;
   keywords?: KeywordDistributionData;
+  topic?: string;
 }
 
 interface SearchResultState {
@@ -45,10 +54,14 @@ type CreateInitialStateType = (arg: Required<Pick<SearchResultProps, 'found' | '
 
 const defaultPageSize = 6;
 
-export const SearchResult: FC<SearchResultProps> = ({ title, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
+export const SearchResult: FC<SearchResultProps> = ({ title, topic, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
   const [areKeywordsShown, setAreKeywordsShown] = useState(false);
+  const [keywordsToShow, setKeywordsToShow] = useState(keywords);
+  const [isPickerOpened, setIsPickerOpened] = useState(false);
+
+  const dialogContainerRef = useRef<HTMLDivElement>(null);
 
   const [state, dispatch] = useReducer(reducer, { pageSize, variant, found, append }, createInitialState);
 
@@ -56,6 +69,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   useEffect(() =>  dispatch({ type: 'variant', variant }), [variant]);
   useEffect(() =>  dispatch({ type: 'append', append }), [append]);
   useEffect(() =>  dispatch({ type: 'list', list: found }), [found]);
+  useEffect(() =>  setKeywordsToShow(keywords), [keywords]);
 
   const handleVote = useCallback((docToHandle: Doc, delta: 1 | -1) => {
     docToHandle.upvote = (docToHandle.upvote || 0) + delta;
@@ -80,14 +94,49 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
   }, [favorites]);
 
   const handleDetailedClose = useCallback(() => setDetailedDoc(null), []);
+  const handleForAllTime = useCallback(() => {
+    setKeywordsToShow(keywords);
+    setAreKeywordsShown(true);
+  }, [keywords]);
+  const toggleDatePicker = useCallback(() => setIsPickerOpened(prev => !prev), []);
+  const handleDatePickerOk = useCallback(async (dateRange: DateRange) => {
+    try {
+      setKeywordsToShow(await axios.post<KeywordDistributionData>('/view_representation_keywords', {
+        topic_name: topic,
+        from: new Date(dateRange[0].setHours(0, 0, 0, 0)).toString(),
+        to: new Date(dateRange[1].setHours(23, 59, 59, 999)).toString(),
+      }).then((res) => res.data));
+      setIsPickerOpened(false);
+      setAreKeywordsShown(true);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }, [topic]);
 
   return (
     <div className="w-full h-full">
       {(title || keywords) && <div className="text-lg font-bold text-center mb-4">
         {title}
-        {keywords && <button className="hover:text-primary relative left-4 top-3" onClick={() => setAreKeywordsShown(true)}>
-          <PresentationChartLineIcon className="w-8 h-8"  />
-        </button>}
+        {keywords && (
+          <>
+            <button className="hover:text-primary relative left-4 top-3" onClick={handleForAllTime} title="Keywords for all time">
+              <PresentationChartLineIcon className="w-8 h-8" />
+            </button>
+            <button className="hover:text-primary relative left-4 top-3" onClick={toggleDatePicker} title="Keywords for time range">
+              <CalendarDaysIcon className="w-8 h-8" />
+            </button>
+            <span ref={dialogContainerRef} className={styles.dateRangeWrapper}>
+              <DateRangePicker
+                placement="leftStart"
+                open={isPickerOpened}
+                placeholder="Select date range"
+                onOk={handleDatePickerOk}
+                toggleAs={EmptySpan}  // hide range input
+                container={dialogContainerRef.current || undefined} // place popup in the same container to fix scrolling
+              />
+            </span>
+          </>
+        )}
         {areKeywordsShown && (
           <Modal
             open={areKeywordsShown}
@@ -99,7 +148,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
                 <button className="absolute top-0 right-4 hover:text-primary" onClick={() => setAreKeywordsShown(false)}>
                   <XMarkIcon className="w-8 h-8" />
                 </button>
-                <KeywordsDistribution data={keywords || {}} />
+                <KeywordsDistribution data={keywordsToShow || {}} />
               </div>
             </div>
           </Modal>
@@ -202,6 +251,8 @@ export const SearchResult: FC<SearchResultProps> = ({ title, found, append = fal
     </div>
   )
 };
+
+const EmptySpan = forwardRef(() => <span></span>);
 
 const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
 
