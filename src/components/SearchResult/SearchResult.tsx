@@ -101,7 +101,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, topic, found, appen
   const toggleDatePicker = useCallback(() => setIsPickerOpened(prev => !prev), []);
   const handleDatePickerOk = useCallback(async (dateRange: DateRange) => {
     try {
-      setKeywordsToShow(await axios.post<KeywordDistributionData>('/view_representation_keywords', {
+      setKeywordsToShow(await axios.post<KeywordDistributionData>('/viewing_representation_keywords', {
         topic_name: topic,
         from: new Date(dateRange[0].setHours(0, 0, 0, 0)).toString(),
         to: new Date(dateRange[1].setHours(23, 59, 59, 999)).toString(),
