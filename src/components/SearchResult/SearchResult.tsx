@@ -19,6 +19,7 @@ import { KeywordsDistribution } from '../KeywordsDistribution';
 import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
 import { DateRangePicker } from 'rsuite';
 import { DateRange } from 'rsuite/DateRangePicker';
+import { format } from 'date-fns'
 
 type ViewVariant = 'tiles' | 'snippets';
 
@@ -103,8 +104,8 @@ export const SearchResult: FC<SearchResultProps> = ({ title, topic, found, appen
     try {
       setKeywordsToShow(await axios.post<KeywordDistributionData>('/viewing_representation_keywords', {
         topic_name: topic,
-        from: new Date(dateRange[0].setHours(0, 0, 0, 0)).toString(),
-        to: new Date(dateRange[1].setHours(23, 59, 59, 999)).toString(),
+        from: format(new Date(dateRange[0].setHours(0, 0, 0, 0)), 'dd/MM/yyyy HH:mm:ss'),
+        to: format(new Date(dateRange[1].setHours(23, 59, 59, 999)), 'dd/MM/yyyy HH:mm:ss'),
       }).then((res) => res.data));
       setIsPickerOpened(false);
       setAreKeywordsShown(true);
