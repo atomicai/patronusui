@@ -110,6 +110,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
                           ? <Spinner />
                           : <SearchResult
                             title={searchResponse.title || topic}
+                            topic={topic}
                             found={searchResponse.docs}
                             keywords={searchResponse.keywords || {}}
                           />

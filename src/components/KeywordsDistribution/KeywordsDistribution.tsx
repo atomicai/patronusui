@@ -1,4 +1,4 @@
-import { FC, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, Fragment, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { KeywordDistributionData } from '../../@types/search';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
 import Slider from '@mui/material/Slider';
@@ -111,11 +111,10 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
               <YAxis dataKey="value" domain={domainY} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {linear.map((s, idx) => (
-                <>
+                <Fragment key={s.word}>
                   {
                     s.data.length
                       ? <Line
-                        key={s.word}
                         dataKey="value"
                         data={s.data} name={s.word as string}
                         hide={hidden.indexOf(idx) > -1}
@@ -124,7 +123,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
                       />
                       : null
                   }
-                </>
+                </Fragment>
               ))}
             </LineChart>
           </ResponsiveContainer>
