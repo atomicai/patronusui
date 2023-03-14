@@ -1,5 +1,5 @@
 import {
-  CalendarDaysIcon,
+  ClockIcon,
   CheckCircleIcon,
   HomeIcon,
   PresentationChartBarIcon,
@@ -172,7 +172,7 @@ export const Search: React.FC = () => {
           />
           {withTimestamp && (
             <>
-              <CalendarDaysIcon
+              <ClockIcon
                 className={`w-8 h-8 mr-2 text-primary hover:cursor-pointer hover:text-white`}
                 onClick={() => setOpenTimestamp(true)}
               />
