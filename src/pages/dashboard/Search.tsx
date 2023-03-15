@@ -1,5 +1,5 @@
 import {
-  CalendarDaysIcon,
+  ClockIcon,
   CheckCircleIcon,
   HomeIcon,
   PresentationChartBarIcon,
@@ -20,6 +20,7 @@ import { db } from '../../firebase'
 import { Ranges } from '../../utils/dates'
 import { SearchResult } from '../../components/SearchResult';
 import { Spinner } from '../../components/Spinner';
+import { format } from 'date-fns'
 
 export const Search: React.FC = () => {
   const [withTimestamp, setWithTimestamp] = useState<boolean>(false)
@@ -67,8 +68,8 @@ export const Search: React.FC = () => {
       const response: Data = await axios
         .post('/searching', {
           text: inputValue,
-          from: dateRange[0].toString(),
-          to: dateRange[1].toString()
+          from: format(new Date(dateRange[0].setHours(0, 0, 0, 0)), 'dd/MM/yyyy HH:mm:ss'),
+          to: format(new Date(dateRange[1].setHours(23, 59, 59, 999)), 'dd/MM/yyyy HH:mm:ss'),
         })
         .then((res) => res.data)
       setIsLoading(false);
@@ -171,7 +172,7 @@ export const Search: React.FC = () => {
           />
           {withTimestamp && (
             <>
-              <CalendarDaysIcon
+              <ClockIcon
                 className={`w-8 h-8 mr-2 text-primary hover:cursor-pointer hover:text-white`}
                 onClick={() => setOpenTimestamp(true)}
               />
