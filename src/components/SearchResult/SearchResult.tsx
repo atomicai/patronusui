@@ -7,7 +7,7 @@ import { TileDoc, TileStyleIndexes } from './TileDoc';
 import { FavoriteDoc } from './FavoriteDoc';
 import {
   ArrowDownTrayIcon,
-  CalendarDaysIcon,
+  ClockIcon,
   ChevronRightIcon,
   PresentationChartLineIcon,
   XMarkIcon
@@ -124,7 +124,7 @@ export const SearchResult: FC<SearchResultProps> = ({ title, topic, found, appen
               <PresentationChartLineIcon className="w-8 h-8" />
             </button>
             <button className="hover:text-primary relative left-4 top-3" onClick={toggleDatePicker} title="Keywords for time range">
-              <CalendarDaysIcon className="w-8 h-8" />
+              <ClockIcon className="w-8 h-8" />
             </button>
             <span ref={dialogContainerRef} className={styles.dateRangeWrapper}>
               <DateRangePicker
