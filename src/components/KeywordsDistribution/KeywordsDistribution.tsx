@@ -154,7 +154,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
         </div>
       </div>
       <div className="flex flex-col justify-between p-8 pb-0">
-        <div>
+        <div className="h-[80%] overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 pr-4">
           {words.map((item, idx) => (
             <div key={item} className="min-w-max">
               <label className="cursor-pointer" style={{ color: diagramColors[idx % diagramColorsLength] }}>
