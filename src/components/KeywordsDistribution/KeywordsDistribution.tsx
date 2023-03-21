@@ -3,6 +3,7 @@ import { KeywordDistributionData } from '../../@types/search';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
 import Slider from '@mui/material/Slider';
 import { toast } from 'react-hot-toast';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 interface KeywordsDistributionProps {
   data: KeywordDistributionData;
@@ -100,6 +101,9 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
     }
   }, [domainX]);
 
+  const handleSelectAll = useCallback(() => setHidden([]), []);
+  const handleDeselectAll = useCallback(() => setHidden(words.map((item, idx) => idx)), [words]);
+
   return (
     <div className="h-full flex">
       <div className="h-full flex-1 pb-16 relative">
@@ -153,8 +157,12 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
           />
         </div>
       </div>
-      <div className="flex flex-col justify-between p-8 pb-0">
-        <div className="h-[80%] overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 pr-4">
+      <div className="flex flex-col justify-between p-8 pb-0 pt-2">
+        <div className="text-primary flex mt-2">
+          <button title="Select all" className="hover:text-white mr-2" onClick={handleSelectAll}><CheckCircleIcon className="w-8 h-8" /></button>
+          <button title="Deselect all" className="hover:text-white" onClick={handleDeselectAll}><XCircleIcon className="w-8 h-8" /></button>
+        </div>
+        <div className="grow overflow-auto mt-2 mb-8 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 pr-4">
           {words.map((item, idx) => (
             <div key={item} className="min-w-max">
               <label className="cursor-pointer" style={{ color: diagramColors[idx % diagramColorsLength] }}>
