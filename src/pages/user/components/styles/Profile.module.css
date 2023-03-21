@@ -19,15 +19,18 @@
     @apply h-8 w-8 mr-2 text-primary cursor-pointer hover:text-white;
   }
   .iconUser {
-    @apply h-12 w-12;
+    @apply h-48 w-48;
   }
   .section {
-    @apply flex items-center justify-center w-full h-full;
+    @apply grid grid-cols-3 w-full h-full;
   }
-  .info {
-    @apply w-1/6 h-1/6 flex flex-col items-center justify-evenly;
+  .sectionUser {
+    @apply flex flex-col items-center justify-start gap-8 p-8;
   }
   .p {
-    @apply text-lg text-white;
+    @apply text-xl text-white;
+  }
+  .searchQuery {
+    @apply p-4 bg-white/[0.1] text-lg text-white rounded-xl hover:bg-white/[0.2];
   }
 }
