@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .tabElement {
+    @apply col-span-2 flex flex-col items-start justify-start gap-4 p-8;
+  }
+  .header {
+    @apply text-xl text-white;
+  }
+  .children {
+    @apply flex flex-col gap-4 w-4/5 h-[75vh] pr-16 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-white/[0.8] scrollbar-track-white/[0.1];
+  }
+}

@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .header {
+    @apply text-xl;
+  }
+  .icon {
+    @apply h-8 w-8 mr-2;
+  }
+  .tabPanelElem {
+    @apply flex h-12 py-2 px-10 border-white/[0.2] rounded-t-xl border-b-2 text-white select-none cursor-pointer hover:bg-white/[0.1];
+  }
+  .active {
+    @apply border-primary;
+  }
+  .tabPanel {
+    @apply flex items-center justify-start;
+  }
+}
