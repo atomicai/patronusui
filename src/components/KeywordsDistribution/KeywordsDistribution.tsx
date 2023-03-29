@@ -115,6 +115,9 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
   const handleSelectAll = useCallback(() => setHidden([]), []);
   const handleDeselectAll = useCallback(() => setHidden(words.map((item, idx) => idx)), [words]);
 
+  const yRange = useMemo(() => (valueType === KeywordsDistributionValueType.absolute) ? domainY : domainYRelative,
+    [valueType, domainY, domainYRelative]);
+
   return (
     <div className="h-full flex">
       <div className="h-full flex-1 pb-16 relative">
@@ -123,7 +126,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             <LineChart>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="unixtime" type="number" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
-              <YAxis dataKey="value" domain={(valueType === KeywordsDistributionValueType.absolute) ? domainY : domainYRelative} />
+              <YAxis dataKey="value" domain={yRange} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {linear.map((s, idx) => (
                 <Fragment key={s.word}>
@@ -148,7 +151,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             <BarChart data={bar}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="unixtime" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
-              <YAxis domain={(valueType === KeywordsDistributionValueType.absolute) ? domainY : domainYRelative} />
+              <YAxis domain={yRange} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {words.map((s, idx) => (
                 <Bar key={s} dataKey={s} hide={hidden.indexOf(idx) > -1} fill={diagramColors[idx % diagramColorsLength]} />
