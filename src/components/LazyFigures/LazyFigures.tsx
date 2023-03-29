@@ -82,7 +82,10 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
             : {}
         ),
       })
-        .then(({ data }) => setSearchResponse(data))
+        .then(({ data }) => setSearchResponse(prev => ({
+          ...data,
+          keywords: prev.keywords || data.keywords,  // take previous values if there are no ones in response
+        })))
         .catch(e => toast.error((e as Error).message))
         .finally(() => setIsTopicLoading(false));
     } else {
