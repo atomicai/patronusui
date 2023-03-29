@@ -10,12 +10,18 @@ interface KeywordsDistributionProps {
 }
 
 type Range = [number, number];
-type LinearData = {data: {unixtime: number, value: number}[], word: string}[];
+type TimestampedValue = { unixtime: number, value: number };
+type LinearData = { data: TimestampedValue[], word: string }[];
 type BarData = Record<'unixtime' | string, number>[];
 
 enum KeywordsDistributionType {
   linear = 'linear',
   bar = 'bar',
+}
+
+enum KeywordsDistributionValueType {
+  absolute = 'absolute',
+  relative = 'relative',
 }
 
 const tooltipContentStyle = {
@@ -46,16 +52,18 @@ const xDelta = 86400000;
 const yDelta = 1;
 
 export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) => {
-  const [linearData, barData, domainX, domainY, words] = useMemo(() => {
+  const [linearData, barData, domainX, domainY, words,
+    linearDataRelative, barDataRelative, domainYRelative] = useMemo(() => {
     try {
       return prepareData(data);
     } catch (e) {
       toast.error((e as Error).message);
-      return [[], [], [0, 1] as Range, [0, 1] as Range, []];
+      return [[], [], [0, 1] as Range, [0, 1] as Range, [], [], [], [0, 1] as Range, [0, 1] as Range];
     }
   }, [data]);
   const [hidden, setHidden] = useState<number[]>([]);
   const [type, setType] = useState<KeywordsDistributionType>(KeywordsDistributionType.linear);
+  const [valueType, setValueType] = useState<KeywordsDistributionValueType>(KeywordsDistributionValueType.absolute);
 
   const [xRange, setXRange] = useState<Range>(domainX);
   const [linear, setLinear] = useState<LinearData>(linearData);
@@ -64,15 +72,17 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
   useEffect(() => setHidden([]), [data]);
 
   useEffect(() => {
-    setLinear(linearData.map(item => ({
+    const data = (valueType === KeywordsDistributionValueType.absolute) ? linearData : linearDataRelative;
+    setLinear(data.map(item => ({
       ...item,
       data: item.data.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])),
     })));
-  }, [linearData, xRange, domainY]);
+  }, [linearData, linearDataRelative, xRange, valueType]);
 
   useEffect(() => {
-    setBar(barData.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])));
-  }, [barData, xRange, domainY]);
+    const data = (valueType === KeywordsDistributionValueType.absolute) ? barData : barDataRelative;
+    setBar(data.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])));
+  }, [barData, barDataRelative, xRange, valueType]);
 
   const toggleHidden =(e: SyntheticEvent, idx: number) => {
     if (!(e.target as HTMLInputElement).checked) {
@@ -83,6 +93,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
   };
 
   const toggleType = (type: KeywordsDistributionType) => setType(type);
+  const toggleValueType = (type: KeywordsDistributionValueType) => setValueType(type);
 
   const handleSlider = useCallback((event: Event, newValue: number | number[], activeThumb: number) => {
     if (!Array.isArray(newValue)) {
@@ -112,7 +123,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             <LineChart>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="unixtime" type="number" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
-              <YAxis dataKey="value" domain={domainY} />
+              <YAxis dataKey="value" domain={(valueType === KeywordsDistributionValueType.absolute) ? domainY : domainYRelative} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {linear.map((s, idx) => (
                 <Fragment key={s.word}>
@@ -137,7 +148,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             <BarChart data={bar}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="unixtime" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
-              <YAxis domain={domainY} />
+              <YAxis domain={(valueType === KeywordsDistributionValueType.absolute) ? domainY : domainYRelative} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {words.map((s, idx) => (
                 <Bar key={s} dataKey={s} hide={hidden.indexOf(idx) > -1} fill={diagramColors[idx % diagramColorsLength]} />
@@ -172,11 +183,21 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             </div>
           ))}
         </div>
+        <div className="mb-4">
+          {Object.values(KeywordsDistributionValueType).map(item => (
+            <div key={item} className="min-w-max">
+              <label>
+                <input type="radio" checked={valueType === item} onChange={() => toggleValueType(item)} />
+                <span className="ml-2">{item}</span>
+              </label>
+            </div>
+          ))}
+        </div>
         <div>
           {Object.values(KeywordsDistributionType).map(item => (
             <div key={item} className="min-w-max">
               <label>
-                <input type="radio" value={KeywordsDistributionType.linear} checked={type === item} onChange={() => toggleType(item)} />
+                <input type="radio" checked={type === item} onChange={() => toggleType(item)} />
                 <span className="ml-2">{item}</span>
               </label>
             </div>
@@ -189,17 +210,33 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
 
 const unixTimeFormatter = (unixtime: number) => (new Date(unixtime)).toLocaleString('ru-RU');
 
-const prepareData = (data: KeywordDistributionData): [LinearData, BarData, Range, Range, string[]] => {
+const sorter = (a: Record<'unixtime', number>, b: Record<'unixtime', number>) => a.unixtime - b.unixtime;
+
+const prepareData = (data: KeywordDistributionData): [LinearData, BarData, Range, Range, string[], LinearData, BarData, Range] => {
   const words: string[] = [];
-  const transformed = Object.keys(data).map((word) => {
+  const transformed: LinearData = [];
+  const transformedRelative: LinearData = [];
+  Object.keys(data).forEach(word => {
     words.push(word);
-    return {
+    transformed.push({
       word,
       data: (data[word] || [])
-        .map(({ value, timestamp }) => ({ value, unixtime: (new Date(toIsoString(timestamp))).valueOf() }))
-        .sort((a, b) => a.unixtime - b.unixtime),
-    };
+        .map(({ value, timestamp }) =>
+          ({ value, unixtime: (new Date(toIsoString(timestamp))).valueOf() }))
+        .sort(sorter),
+    });
+    const relativeData: TimestampedValue[] = [];
+    (data[word] || []).forEach(({ relative, timestamp }) => {
+      if (relative !== undefined) {
+        relativeData.push({ value: relative, unixtime: (new Date(toIsoString(timestamp))).valueOf() });
+      }
+    });
+    transformedRelative.push({
+      word,
+      data: relativeData.sort(sorter),
+    });
   });
+
   const minX: number[] = [];
   const maxX: number[] = [];
   const minY: number[] = [];
@@ -219,12 +256,31 @@ const prepareData = (data: KeywordDistributionData): [LinearData, BarData, Range
       });
     }
   });
+
+  const minYRelative: number[] = [];
+  const maxYRelative: number[] = [];
+  const barDataRelative: Record<number, Record<string, number>> = {};
+  transformedRelative.forEach(item => {
+    if (item.data.length) {
+      const values = item.data.map(({ value }) => value);
+      minYRelative.push(Math.min(...values));
+      maxYRelative.push(Math.max(...values));
+      item.data.forEach(s => {
+        const unixtime = s.unixtime;
+        barDataRelative[unixtime] = { ...barDataRelative[unixtime], unixtime, [item.word]: s.value };
+      });
+    }
+  });
+
   return [
     transformed,
-    Object.values(barData).sort((a, b) => a.unixtime - b.unixtime),
+    Object.values(barData).sort(sorter),
     [Math.min(...minX) - xDelta, Math.max(...maxX) + xDelta],
     [Math.min(...minY) - yDelta, Math.max(...maxY) + yDelta],
     words,
+    transformedRelative,
+    Object.values(barDataRelative).sort(sorter),
+    [Math.min(...minYRelative) - yDelta, Math.max(...maxYRelative) + yDelta],
   ];
 };
 
