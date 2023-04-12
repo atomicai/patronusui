@@ -3,7 +3,14 @@ import { KeywordDistributionData } from '../../@types/search';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
 import Slider from '@mui/material/Slider';
 import { toast } from 'react-hot-toast';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import {
+  AdjustmentsVerticalIcon,
+  CheckCircleIcon, PresentationChartBarIcon,
+  PresentationChartLineIcon,
+  ReceiptPercentIcon,
+  XCircleIcon
+} from '@heroicons/react/24/outline';
+import cn from 'classnames';
 
 interface KeywordsDistributionProps {
   data: KeywordDistributionData;
@@ -92,9 +99,6 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
     }
   };
 
-  const toggleType = (type: KeywordsDistributionType) => setType(type);
-  const toggleValueType = (type: KeywordsDistributionValueType) => setValueType(type);
-
   const handleSlider = useCallback((event: Event, newValue: number | number[], activeThumb: number) => {
     if (!Array.isArray(newValue)) {
       return;
@@ -114,6 +118,11 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
 
   const handleSelectAll = useCallback(() => setHidden([]), []);
   const handleDeselectAll = useCallback(() => setHidden(words.map((item, idx) => idx)), [words]);
+
+  const handleAbsolute = useCallback(() => setValueType(KeywordsDistributionValueType.absolute), []);
+  const handleRelative = useCallback(() => setValueType(KeywordsDistributionValueType.relative), []);
+  const handleLinear = useCallback(() => setType(KeywordsDistributionType.linear), []);
+  const handleBar = useCallback(() => setType(KeywordsDistributionType.bar), []);
 
   const yRange = useMemo(() => (valueType === KeywordsDistributionValueType.absolute) ? domainY : domainYRelative,
     [valueType, domainY, domainYRelative]);
@@ -186,25 +195,37 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             </div>
           ))}
         </div>
-        <div className="mb-4">
-          {Object.values(KeywordsDistributionValueType).map(item => (
-            <div key={item} className="min-w-max">
-              <label>
-                <input type="radio" checked={valueType === item} onChange={() => toggleValueType(item)} />
-                <span className="ml-2">{item}</span>
-              </label>
-            </div>
-          ))}
+        <div className="text-primary mb-4">
+          <button
+              title="Show absolute values"
+              className={cn('hover:text-white mr-2', { 'text-white': valueType === KeywordsDistributionValueType.absolute})}
+              onClick={handleAbsolute}
+          >
+            <AdjustmentsVerticalIcon className="w-8 h-8" />
+          </button>
+          <button
+              title="Show relative values"
+              className={cn('hover:text-white mr-2', { 'text-white': valueType === KeywordsDistributionValueType.relative})}
+              onClick={handleRelative}
+          >
+            <ReceiptPercentIcon className="w-8 h-8" />
+          </button>
         </div>
-        <div>
-          {Object.values(KeywordsDistributionType).map(item => (
-            <div key={item} className="min-w-max">
-              <label>
-                <input type="radio" checked={type === item} onChange={() => toggleType(item)} />
-                <span className="ml-2">{item}</span>
-              </label>
-            </div>
-          ))}
+        <div className="text-primary">
+          <button
+              title="Show linear diagram"
+              className={cn('hover:text-white mr-2', { 'text-white': type === KeywordsDistributionType.linear})}
+              onClick={handleLinear}
+          >
+            <PresentationChartLineIcon className="w-8 h-8" />
+          </button>
+          <button
+              title="Show bar diagram"
+              className={cn('hover:text-white mr-2', { 'text-white': type === KeywordsDistributionType.bar})}
+              onClick={handleBar}
+          >
+            <PresentationChartBarIcon className="w-8 h-8" />
+          </button>
         </div>
       </div>
     </div>
