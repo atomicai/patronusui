@@ -100,6 +100,7 @@ export const LazyFigures: FC<LazyFiguresProps> = ({ figure, lazyApi }) => {
     if (parentElement?.classList.contains('traces')) {
       const clickedTopic = parentElement.getElementsByTagName('text')[0]?.textContent || '';
       setTopic(clickedTopic);
+      setSearchResponse({ docs: [] });
     }
   }, []);
 
