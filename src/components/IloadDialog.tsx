@@ -28,9 +28,14 @@ interface Props {
 const labelStyle = { display: 'inline-block', width: '10em', marginRight: '0.5em' };
 const autocompleteStyle = { width: '15em' };
 
+const maxNumberOfClusters = 15;
+const defaultNumberOfClusters = 5;
+const numberOfClustersOptions = Array.from(new Array(maxNumberOfClusters)).map((_, idx) => (idx + 1).toString());
+
 export default function IloadDialog({ open, setOpen, handleViewing, columnCandidates }: Props) {
   const [textValue, setTextValue] = useState('');
   const [dateValue, setDateValue] = useState('');
+  const [numValue, setNumValue] = useState(numberOfClustersOptions[defaultNumberOfClusters - 1]);
   const [emailValue, setEmailValue] = useState<string>('')
   const [checkedResults, setCheckedResults] = useState(false)
   const [checkedSubscription, setCheckedSubscription] = useState(false)
@@ -46,6 +51,7 @@ export default function IloadDialog({ open, setOpen, handleViewing, columnCandid
         email: emailValue === '' ? null : emailValue,
         text: textValue,
         datetime: dateValue,
+        num_clusters: numValue,
       }).then(({ data }) => data);
       const errorMessage = (response as ErrorLoadingResponse).error;
       if (errorMessage) {
@@ -113,6 +119,19 @@ export default function IloadDialog({ open, setOpen, handleViewing, columnCandid
               sx={autocompleteStyle}
             />
           </div>
+
+          <div className="flex flex-row items-center">
+            <span className="text-xl" style={labelStyle}>Number of clusters: </span>{' '}
+            <Autocomplete
+              value={numValue}
+              onInputChange={(e, v) => setNumValue(v || numberOfClustersOptions[defaultNumberOfClusters - 1])}
+              options={numberOfClustersOptions}
+              renderInput={(params) => <TextField {...params} />}
+              size="small"
+              sx={autocompleteStyle}
+            />
+          </div>
+
           <div className="mt-6 text-sm">
             <div className="flex flex-row items-center">
               <input
