@@ -1,4 +1,4 @@
-import { FC, forwardRef, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useReducer, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Doc, KeywordDistributionData } from '../../@types/search';
@@ -7,7 +7,6 @@ import { TileDoc, TileStyleIndexes } from './TileDoc';
 import { FavoriteDoc } from './FavoriteDoc';
 import {
   ArrowDownTrayIcon,
-  ClockIcon,
   ChevronRightIcon,
   PresentationChartLineIcon,
   XMarkIcon
@@ -17,9 +16,7 @@ import Modal from '@mui/material/Modal';
 import styles from './SearchResult.module.css';
 import { KeywordsDistribution } from '../KeywordsDistribution';
 import { SnippetDoc, SnippetStyleIndexes } from './SnippetDoc';
-import { DateRangePicker } from 'rsuite';
 import { DateRange } from 'rsuite/DateRangePicker';
-import { format } from 'date-fns'
 
 type ViewVariant = 'tiles' | 'snippets';
 
@@ -30,7 +27,7 @@ interface SearchResultProps {
   append?: boolean
   pageSize?: number;
   keywords?: KeywordDistributionData;
-  topic?: string;
+  dateRange?: DateRange;
 }
 
 interface SearchResultState {
@@ -55,14 +52,11 @@ type CreateInitialStateType = (arg: Required<Pick<SearchResultProps, 'found' | '
 
 const defaultPageSize = 6;
 
-export const SearchResult: FC<SearchResultProps> = ({ title, topic, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
+export const SearchResult: FC<SearchResultProps> = ({ title, dateRange, found, append = false, keywords, variant = 'snippets', pageSize = defaultPageSize  }) => {
   const [favorites, setFavorites] = useState<Doc[]>([]);
   const [detailedDoc, setDetailedDoc] = useState<Doc | null>(null);
   const [areKeywordsShown, setAreKeywordsShown] = useState(false);
   const [keywordsToShow, setKeywordsToShow] = useState(keywords);
-  const [isPickerOpened, setIsPickerOpened] = useState(false);
-
-  const dialogContainerRef = useRef<HTMLDivElement>(null);
 
   const [state, dispatch] = useReducer(reducer, { pageSize, variant, found, append }, createInitialState);
 
@@ -99,44 +93,15 @@ export const SearchResult: FC<SearchResultProps> = ({ title, topic, found, appen
     setKeywordsToShow(keywords);
     setAreKeywordsShown(true);
   }, [keywords]);
-  const toggleDatePicker = useCallback(() => setIsPickerOpened(prev => !prev), []);
-  const handleDatePickerOk = useCallback(async (dateRange: DateRange) => {
-    try {
-      setKeywordsToShow(await axios.post<KeywordDistributionData>('/viewing_representation_keywords', {
-        topic_name: topic,
-        from: format(new Date(dateRange[0].setHours(0, 0, 0, 0)), 'dd/MM/yyyy HH:mm:ss'),
-        to: format(new Date(dateRange[1].setHours(23, 59, 59, 999)), 'dd/MM/yyyy HH:mm:ss'),
-      }).then((res) => res.data));
-      setIsPickerOpened(false);
-      setAreKeywordsShown(true);
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  }, [topic]);
 
   return (
     <div className="w-full h-full">
       {(title || keywords) && <div className="text-lg font-bold text-center mb-4">
-        {title}
+        {title} {dateRange ? `(${dateRange[0].toLocaleDateString('ru-RU')} - ${dateRange[1].toLocaleDateString('ru-RU')})` : null}
         {keywords && (
-          <>
-            <button className="hover:text-primary relative left-4 top-3" onClick={handleForAllTime} title="Keywords for all time">
-              <PresentationChartLineIcon className="w-8 h-8" />
-            </button>
-            <button className="hover:text-primary relative left-4 top-3" onClick={toggleDatePicker} title="Keywords for time range">
-              <ClockIcon className="w-8 h-8" />
-            </button>
-            <span ref={dialogContainerRef} className={styles.dateRangeWrapper}>
-              <DateRangePicker
-                placement="leftStart"
-                open={isPickerOpened}
-                placeholder="Select date range"
-                onOk={handleDatePickerOk}
-                toggleAs={EmptySpan}  // hide range input
-                container={dialogContainerRef.current || undefined} // place popup in the same container to fix scrolling
-              />
-            </span>
-          </>
+          <button className="hover:text-primary relative left-4 top-3" onClick={handleForAllTime} title="Keywords for all time">
+            <PresentationChartLineIcon className="w-8 h-8" />
+          </button>
         )}
         {areKeywordsShown && (
           <Modal
@@ -252,8 +217,6 @@ export const SearchResult: FC<SearchResultProps> = ({ title, topic, found, appen
     </div>
   )
 };
-
-const EmptySpan = forwardRef(() => <span></span>);
 
 const validatePageSize = (pageSize: number) => (pageSize > 0) ? pageSize : defaultPageSize;
 

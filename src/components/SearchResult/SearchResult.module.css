@@ -24,11 +24,3 @@
     padding: 1em;
     color: white;
 }
-.dateRangeWrapper {
-    position: relative;
-    bottom: -2em;
-    color: var(--rs-text-primary);
-}
-.dateRangeWrapper button {
-    color: var(--rs-btn-link-text);
-}

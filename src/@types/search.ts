@@ -48,6 +48,7 @@ export type DataFromServer = {
 export interface TimestampedValue {
   timestamp: string;
   value: number;
+  relative?: number;
 }
 
 export type KeywordDistributionData = Record<string, TimestampedValue[]>

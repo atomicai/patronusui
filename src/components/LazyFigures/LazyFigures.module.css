@@ -6,3 +6,11 @@
     max-width: 1250px;
     min-height: 10em;
 }
+.toolsWrapper {
+    position: relative;
+    bottom: -2em;
+    color: var(--rs-text-primary);
+}
+.toolsWrapper button {
+    color: var(--rs-btn-link-text);
+}

@@ -3,18 +3,32 @@ import { KeywordDistributionData } from '../../@types/search';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
 import Slider from '@mui/material/Slider';
 import { toast } from 'react-hot-toast';
+import {
+  AdjustmentsVerticalIcon,
+  CheckCircleIcon, PresentationChartBarIcon,
+  PresentationChartLineIcon,
+  ReceiptPercentIcon,
+  XCircleIcon
+} from '@heroicons/react/24/outline';
+import cn from 'classnames';
 
 interface KeywordsDistributionProps {
   data: KeywordDistributionData;
 }
 
 type Range = [number, number];
-type LinearData = {data: {unixtime: number, value: number}[], word: string}[];
+type TimestampedValue = { unixtime: number, value: number };
+type LinearData = { data: TimestampedValue[], word: string }[];
 type BarData = Record<'unixtime' | string, number>[];
 
 enum KeywordsDistributionType {
   linear = 'linear',
   bar = 'bar',
+}
+
+enum KeywordsDistributionValueType {
+  absolute = 'absolute',
+  relative = 'relative',
 }
 
 const tooltipContentStyle = {
@@ -45,16 +59,18 @@ const xDelta = 86400000;
 const yDelta = 1;
 
 export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) => {
-  const [linearData, barData, domainX, domainY, words] = useMemo(() => {
+  const [linearData, barData, domainX, domainY, words,
+    linearDataRelative, barDataRelative, domainYRelative] = useMemo(() => {
     try {
       return prepareData(data);
     } catch (e) {
       toast.error((e as Error).message);
-      return [[], [], [0, 1] as Range, [0, 1] as Range, []];
+      return [[], [], [0, 1] as Range, [0, 1] as Range, [], [], [], [0, 1] as Range, [0, 1] as Range];
     }
   }, [data]);
   const [hidden, setHidden] = useState<number[]>([]);
   const [type, setType] = useState<KeywordsDistributionType>(KeywordsDistributionType.linear);
+  const [valueType, setValueType] = useState<KeywordsDistributionValueType>(KeywordsDistributionValueType.absolute);
 
   const [xRange, setXRange] = useState<Range>(domainX);
   const [linear, setLinear] = useState<LinearData>(linearData);
@@ -63,15 +79,17 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
   useEffect(() => setHidden([]), [data]);
 
   useEffect(() => {
-    setLinear(linearData.map(item => ({
+    const data = (valueType === KeywordsDistributionValueType.absolute) ? linearData : linearDataRelative;
+    setLinear(data.map(item => ({
       ...item,
       data: item.data.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])),
     })));
-  }, [linearData, xRange, domainY]);
+  }, [linearData, linearDataRelative, xRange, valueType]);
 
   useEffect(() => {
-    setBar(barData.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])));
-  }, [barData, xRange, domainY]);
+    const data = (valueType === KeywordsDistributionValueType.absolute) ? barData : barDataRelative;
+    setBar(data.filter(({ unixtime }) => (xRange[0] <= unixtime) && (unixtime <= xRange[1])));
+  }, [barData, barDataRelative, xRange, valueType]);
 
   const toggleHidden =(e: SyntheticEvent, idx: number) => {
     if (!(e.target as HTMLInputElement).checked) {
@@ -80,8 +98,6 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
       setHidden(prev => prev.filter(item => item !== idx));
     }
   };
-
-  const toggleType = (type: KeywordsDistributionType) => setType(type);
 
   const handleSlider = useCallback((event: Event, newValue: number | number[], activeThumb: number) => {
     if (!Array.isArray(newValue)) {
@@ -100,6 +116,17 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
     }
   }, [domainX]);
 
+  const handleSelectAll = useCallback(() => setHidden([]), []);
+  const handleDeselectAll = useCallback(() => setHidden(words.map((item, idx) => idx)), [words]);
+
+  const handleAbsolute = useCallback(() => setValueType(KeywordsDistributionValueType.absolute), []);
+  const handleRelative = useCallback(() => setValueType(KeywordsDistributionValueType.relative), []);
+  const handleLinear = useCallback(() => setType(KeywordsDistributionType.linear), []);
+  const handleBar = useCallback(() => setType(KeywordsDistributionType.bar), []);
+
+  const yRange = useMemo(() => (valueType === KeywordsDistributionValueType.absolute) ? domainY : domainYRelative,
+    [valueType, domainY, domainYRelative]);
+
   return (
     <div className="h-full flex">
       <div className="h-full flex-1 pb-16 relative">
@@ -108,7 +135,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             <LineChart>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="unixtime" type="number" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
-              <YAxis dataKey="value" domain={domainY} />
+              <YAxis dataKey="value" domain={yRange} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {linear.map((s, idx) => (
                 <Fragment key={s.word}>
@@ -133,7 +160,7 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             <BarChart data={bar}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="unixtime" domain={xRange} tickFormatter={unixTimeFormatter} interval="preserveStartEnd" angle={-15} />
-              <YAxis domain={domainY} />
+              <YAxis domain={yRange} />
               <Tooltip contentStyle={tooltipContentStyle} labelStyle={tooltipLabelStyle} labelFormatter={unixTimeFormatter} />
               {words.map((s, idx) => (
                 <Bar key={s} dataKey={s} hide={hidden.indexOf(idx) > -1} fill={diagramColors[idx % diagramColorsLength]} />
@@ -153,8 +180,12 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
           />
         </div>
       </div>
-      <div className="flex flex-col justify-between p-8 pb-0">
-        <div>
+      <div className="flex flex-col justify-between p-8 pb-0 pt-2">
+        <div className="text-primary flex mt-2">
+          <button title="Select all" className="hover:text-white mr-2" onClick={handleSelectAll}><CheckCircleIcon className="w-8 h-8" /></button>
+          <button title="Deselect all" className="hover:text-white" onClick={handleDeselectAll}><XCircleIcon className="w-8 h-8" /></button>
+        </div>
+        <div className="grow overflow-auto mt-2 mb-8 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 pr-4">
           {words.map((item, idx) => (
             <div key={item} className="min-w-max">
               <label className="cursor-pointer" style={{ color: diagramColors[idx % diagramColorsLength] }}>
@@ -164,15 +195,37 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
             </div>
           ))}
         </div>
-        <div>
-          {Object.values(KeywordsDistributionType).map(item => (
-            <div key={item} className="min-w-max">
-              <label>
-                <input type="radio" value={KeywordsDistributionType.linear} checked={type === item} onChange={() => toggleType(item)} />
-                <span className="ml-2">{item}</span>
-              </label>
-            </div>
-          ))}
+        <div className="text-primary mb-4">
+          <button
+              title="Show absolute values"
+              className={cn('hover:text-white mr-2', { 'text-white': valueType === KeywordsDistributionValueType.absolute})}
+              onClick={handleAbsolute}
+          >
+            <AdjustmentsVerticalIcon className="w-8 h-8" />
+          </button>
+          <button
+              title="Show relative values"
+              className={cn('hover:text-white mr-2', { 'text-white': valueType === KeywordsDistributionValueType.relative})}
+              onClick={handleRelative}
+          >
+            <ReceiptPercentIcon className="w-8 h-8" />
+          </button>
+        </div>
+        <div className="text-primary">
+          <button
+              title="Show linear diagram"
+              className={cn('hover:text-white mr-2', { 'text-white': type === KeywordsDistributionType.linear})}
+              onClick={handleLinear}
+          >
+            <PresentationChartLineIcon className="w-8 h-8" />
+          </button>
+          <button
+              title="Show bar diagram"
+              className={cn('hover:text-white mr-2', { 'text-white': type === KeywordsDistributionType.bar})}
+              onClick={handleBar}
+          >
+            <PresentationChartBarIcon className="w-8 h-8" />
+          </button>
         </div>
       </div>
     </div>
@@ -181,17 +234,33 @@ export const KeywordsDistribution: FC<KeywordsDistributionProps> = ({ data }) =>
 
 const unixTimeFormatter = (unixtime: number) => (new Date(unixtime)).toLocaleString('ru-RU');
 
-const prepareData = (data: KeywordDistributionData): [LinearData, BarData, Range, Range, string[]] => {
+const sorter = (a: Record<'unixtime', number>, b: Record<'unixtime', number>) => a.unixtime - b.unixtime;
+
+const prepareData = (data: KeywordDistributionData): [LinearData, BarData, Range, Range, string[], LinearData, BarData, Range] => {
   const words: string[] = [];
-  const transformed = Object.keys(data).map((word) => {
+  const transformed: LinearData = [];
+  const transformedRelative: LinearData = [];
+  Object.keys(data).forEach(word => {
     words.push(word);
-    return {
+    transformed.push({
       word,
       data: (data[word] || [])
-        .map(({ value, timestamp }) => ({ value, unixtime: (new Date(toIsoString(timestamp))).valueOf() }))
-        .sort((a, b) => a.unixtime - b.unixtime),
-    };
+        .map(({ value, timestamp }) =>
+          ({ value, unixtime: (new Date(toIsoString(timestamp))).valueOf() }))
+        .sort(sorter),
+    });
+    const relativeData: TimestampedValue[] = [];
+    (data[word] || []).forEach(({ relative, timestamp }) => {
+      if (relative !== undefined) {
+        relativeData.push({ value: relative, unixtime: (new Date(toIsoString(timestamp))).valueOf() });
+      }
+    });
+    transformedRelative.push({
+      word,
+      data: relativeData.sort(sorter),
+    });
   });
+
   const minX: number[] = [];
   const maxX: number[] = [];
   const minY: number[] = [];
@@ -211,12 +280,31 @@ const prepareData = (data: KeywordDistributionData): [LinearData, BarData, Range
       });
     }
   });
+
+  const minYRelative: number[] = [];
+  const maxYRelative: number[] = [];
+  const barDataRelative: Record<number, Record<string, number>> = {};
+  transformedRelative.forEach(item => {
+    if (item.data.length) {
+      const values = item.data.map(({ value }) => value);
+      minYRelative.push(Math.min(...values));
+      maxYRelative.push(Math.max(...values));
+      item.data.forEach(s => {
+        const unixtime = s.unixtime;
+        barDataRelative[unixtime] = { ...barDataRelative[unixtime], unixtime, [item.word]: s.value };
+      });
+    }
+  });
+
   return [
     transformed,
-    Object.values(barData).sort((a, b) => a.unixtime - b.unixtime),
+    Object.values(barData).sort(sorter),
     [Math.min(...minX) - xDelta, Math.max(...maxX) + xDelta],
     [Math.min(...minY) - yDelta, Math.max(...maxY) + yDelta],
     words,
+    transformedRelative,
+    Object.values(barDataRelative).sort(sorter),
+    [Math.min(...minYRelative) - yDelta, Math.max(...maxYRelative) + yDelta],
   ];
 };
 
